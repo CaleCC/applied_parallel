@@ -27,8 +27,9 @@ void square_dgemm (int n, double* A, double* B, double* C)
     for (int j = 0; j < n; ++j)
     {
       /* Compute C(i,j) */
-
+      int Cij = C[i + j * n];
       for( int k = 0; k < n; k++ )
-	       C[i + j * n]+= A[i+k*n] * B[k+j*n];
+	       Cij+= A[i+k*n] * B[k+j*n];
+      C[i + j * n ] = Cij;
     }
 }
