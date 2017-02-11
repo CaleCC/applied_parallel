@@ -46,9 +46,9 @@ static void do_block (int lda, int M, int N, int K, double* A, double* B, double
 void square_dgemm (int lda, double* A, double* B, double* C)
 {
   /* For each block-row of A */
-  for (int i = 0; i < lda; i += BLOCK_SIZE)
+  cilk_for (int i = 0; i < lda; i += BLOCK_SIZE)
     /* For each block-column of B */
-    for (int j = 0; j < lda; j += BLOCK_SIZE)
+  cilk_for (int j = 0; j < lda; j += BLOCK_SIZE)
       /* Accumulate block dgemms into block of C */
       for (int k = 0; k < lda; k += BLOCK_SIZE)
       {
