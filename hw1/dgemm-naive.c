@@ -67,7 +67,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                 int N = MIN( BLOCK_SIZE, ( n-k ) );
 
                                 C2 = C + i + j*n;
-                                A2 = AT + k + i*n;
+                                A2 = AT + i + k*n;
                                 B2 = B + k + j*n;
 
                                 for( int ii = 0; ii < L; ++ii )
@@ -80,7 +80,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
 
                                                 for( int kk = 0; kk < N; ++kk )
                                                 {
-                                                        cij += A2[ ii + kk*n ] * B[ kk + jj*n ];
+                                                        cij += A2[ ii + kk*n ] * B2[ kk + jj*n ];
                                                 }
                                                 C2[ ii + jj*n ] = cij;
                                         }
