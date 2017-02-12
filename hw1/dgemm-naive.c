@@ -28,9 +28,9 @@ void square_dgemm ( int n, double* A, double* B, double* C )
 
         double * AT = malloc( n*n*sizeof( double* ) );
 
-        double *C2;
-        double *B2;
-        double *A2;
+        // double *C2;
+        // double *B2;
+        // double *A2;
 
         for( int i = 0; i < n; ++i )
         {
@@ -40,18 +40,18 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                 }
         }
 
-        int BLOCK_SIZE = ( int ) floor( sqrt( n ) );
+        //int BLOCK_SIZE = ( int ) floor( sqrt( n ) );
 
         /** For each row i of A */
         for( int i = 0; i < n; ++i )
         {
                 /* For each column j of B */
-                for( int k = 0; k < n; ++k )
+                for( int j = 0; j < n; ++j )
                 {
                         /* Compute C(i,j) */
                         //double cij = C[ i + j*n ];
 
-                        for( int j = 0; j < n; j++ )
+                        for( int k = 0; k < n; k++ )
                         {
                                 C[ i + j*n ] += AT[ i*n + k ] * B[ k + j*n ];
                         }
