@@ -70,17 +70,17 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                 A2 = AT + k + i*n;
                                 B2 = B + k + j*n;
 
-                                for( int ii = i; ii < L; ++ii )
+                                for( int ii = 0; ii < L; ++ii )
                                 {
 
-                                        for( int jj = j; jj < M; ++jj )
+                                        for( int jj = 0; jj < M; ++jj )
                                         {
                                                 /* Compute C(i,j) */
                                                 //double cij = C2[ ii + jj*n ];
 
-                                                for( int kk = k; kk < N; ++kk )
+                                                for( int kk = 0; kk < N; ++kk )
                                                 {
-                                                        C[ ii + jj*n  ] += AT[ kk + ii*n ] * B[ kk + jj*n ];
+                                                        C2[ ii + jj*n  ] += A2[ kk + ii*n ] * B2[ kk + jj*n ];
                                                 }
                                                 //C2[ ii + jj*n ] = cij;
                                         }
