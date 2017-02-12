@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 /*
     Please include compiler name below (you may also include any other modules you would like to be loaded)
 
@@ -28,34 +30,62 @@ void square_dgemm ( int n, double* A, double* B, double* C )
 
         double * AT = malloc( n*n*sizeof( double* ) );
 
-        // double *C2;
-        // double *B2;
-        // double *A2;
+        double *C2;
+        double *B2;
+        double *A2;
 
+        /**
+        *       Transpose the matrix
+        *
+        *       [ 1 2 3 ]    [ 1 4 7 ]
+        *       [ 4 5 6 ] -> [ 2 5 8 ]
+        *       [ 7 8 9 ]    [ 3 6 9 ]
+        **/
         for( int i = 0; i < n; ++i )
         {
-                for( int j = 0; j< n; ++j )
+                for( int j = 0; j < n; ++j )
                 {
                         AT[ i*n + j ] = A[ i + n*j ];
                 }
         }
 
+        // Calculate appropriate block size
         //int BLOCK_SIZE = ( int ) floor( sqrt( n ) );
-
+        int BLOCK_SIZE = 41;
         /** For each row i of A */
-        for( int i = 0; i < n; ++i )
+        for( int i = 0; i < n; i += BLOCK_SIZE )
         {
                 /* For each column j of B */
-                for( int k = 0; k < n; ++k )
+                for( int j = 0; j < n; j += BLOCK_SIZE )
                 {
-                        /* Compute C(i,j) */
-                        //double cij = C[ i + j*n ];
 
-                        for( int j = 0; j < n; j++ )
+                        for( int k = 0; k < n; k += BLOCK_SIZE )
                         {
-                                C[ i + j*n ] += AT[ i*n + k ] * B[ k + j*n ];
+
+                                int L = MIN( BLOCK_SIZE, ( n-i ) );
+                                int M = MIN( BLOCK_SIZE, ( n-j ) );
+                                int N = MIN( BLOCK_SIZE, ( n-k ) );
+
+                                C2 = C + i + j*n;
+                                A2 = AT + i + k*n;
+                                B2 = B + k + j*n;
+
+                                for( int ii = 0; ii < L; ++ii )
+                                {
+
+                                        for( int jj = 0; jj < M; ++jj )
+                                        {
+                                                /* Compute C(i,j) */
+                                                double cij = C2[ ii + jj*n ];
+
+                                                for( int kk = 0; kk < N; ++kk )
+                                                {
+                                                        cij += A2[ ii + kk*n ] * B[ kk + jj*n ];
+                                                }
+                                                C2[ ii + jj*n ] = cij;
+                                        }
+                                }
                         }
-                        //C[ i + j*n ] = cij;
                 }
         }
 
