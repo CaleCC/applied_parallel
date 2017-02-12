@@ -56,19 +56,19 @@ void square_dgemm ( int n, double* A, double* B, double* C )
         for( int i = 0; i < n; i += BLOCK_SIZE )
         {
                 /* For each column j of B */
-                for( int j = 0; j < n; j += BLOCK_SIZE )
+                for( int k = 0; k < n; k += BLOCK_SIZE )
                 {
 
-                        for( int k = 0; k < n; k += BLOCK_SIZE )
+                        for( int j = 0; j < n; j += BLOCK_SIZE )
                         {
 
                                 int L = MIN( BLOCK_SIZE, ( n-i ) );
                                 int M = MIN( BLOCK_SIZE, ( n-j ) );
                                 int N = MIN( BLOCK_SIZE, ( n-k ) );
 
-                                C2 = C + i + j*n;
-                                A2 = AT + k + i*n;
-                                B2 = B + k + j*n;
+                                // C2 = C + i + j*n;
+                                // A2 = AT + k + i*n;
+                                // B2 = B + k + j*n;
 
                                 for( int ii = 0; ii < L; ++ii )
                                 {
@@ -80,7 +80,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
 
                                                 for( int kk = 0; kk < N; ++kk )
                                                 {
-                                                        C2[ ii + jj*n  ] += A2[ kk + ii*n ] * B2[ kk + jj*n ];
+                                                        C[ ii + jj*n +i + j*n ] += AT[ kk + ii*n + k + i*n] * B[ kk + jj*n +k + j*n ];
                                                 }
                                                 //C2[ ii + jj*n ] = cij;
                                         }
