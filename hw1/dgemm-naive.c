@@ -80,7 +80,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
 
                                                 for( int kk = k; kk < N; ++kk )
                                                 {
-                                                        C[ ii + jj*n  ] += A[ ii + kk*n ] * B[ kk + jj*n ];
+                                                        C[ ii + jj*n  ] += AT[ kk + ii*n ] * B[ kk + jj*n ];
                                                 }
                                                 //C2[ ii + jj*n ] = cij;
                                         }
