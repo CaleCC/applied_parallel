@@ -1,9 +1,9 @@
 #!/bin/bash -l
 #SBATCH -n 1
 #SBATCH -p normal
-#SBATCH -t 00:06:00
+#SBATCH -t 00:10:00
 #SBATCH -J Blas_job
 #SBATCH -o MyOutputFile.%j.out
 #SBATCH -e MyErrorFile.%j.err
 
-perfexpert 0.1 ./benchmark-naive
+perfexpert 0.5 -r 5 -m -v 5 ./benchmark-naive
