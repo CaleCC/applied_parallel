@@ -7,7 +7,7 @@ CFLAGS = -Wall -std=gnu99    $(OPT)
 #LDLIBS = -lrt -Wl,--start-group $(MKLROOT)/lib/intel64/libmkl_intel_lp64.a $(MKLROOT)/lib/intel64/libmkl_sequential.a $(MKLROOT)/lib/intel64/libmkl_core.a -Wl,--end-group -lpthread -lm
 LDLIBS = -lrt  -I$(MKLROOT)/include -Wl,-L$(MKLROOT)/lib/intel64/ -lmkl_intel_lp64 -lmkl_core -lgomp -lmkl_gnu_thread -lpthread -lm -ldl
 
-targets = benchmark-naive 
+targets = benchmark-naive
 objects = benchmark.o dgemm-naive.o
 
 .PHONY : default
@@ -20,6 +20,8 @@ benchmark-naive : benchmark.o dgemm-naive.o
 	$(CC) -o $@ $^ $(LDLIBS)
 
 benchmark.o : benchmark.c
+	$(CC) -c $(CFLAGS) $<
+dgemm-naive.o : dgemm-naive.c
 	$(CC) -c $(CFLAGS) $<
 
 .PHONY : clean
