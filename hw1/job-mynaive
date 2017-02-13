@@ -6,4 +6,4 @@
 #SBATCH -o MyOutputFile.%j.out
 #SBATCH -e MyErrorFile.%j.err
 
-perfexpert 0.5 -m -s dgemm-naive.c  ./benchmark-naive
+perfexpert 0.5 -r 5 ./benchmark-naive
