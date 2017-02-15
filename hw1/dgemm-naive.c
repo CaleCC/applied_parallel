@@ -20,6 +20,17 @@ LDLIBS = -lrt -Wl,--start-group $(MKLROOT)/lib/intel64/libmkl_intel_lp64.a $(MKL
 
 const char* dgemm_desc = "Naive, three-loop dgemm.";
 
+static void do_block(int n, int L, int M, int N, double* A, double* B, double* c){
+  for(int i = 0; i < L; ++i){
+    for(int j = 0; j < M; j++){
+      for(int k = 0; k < N; k++){
+        C[ i + j*n ] += A[ k + i*n ] * B[ k + j*n  ];
+
+      }
+    }
+  }
+}
+
 
 /* This routine performs a dgemm operation
  *  C := C + A * B
@@ -50,7 +61,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
         }
 
         // Calculate appropriate block size
-        int BLOCK_SIZE = 150;
+        int BLOCK_SIZE = 128;
         //int BLOCK_SIZE = 82;
         /** For each row i of A */
         for( int i = 0; i < n; i += BLOCK_SIZE )
@@ -66,9 +77,9 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                 int M = MIN( BLOCK_SIZE, ( n-j ) );
                                 int N = MIN( BLOCK_SIZE, ( n-k ) );
 
-                                // C2 = C + i + j*n;
-                                // A2 = AT + k + i*n;
-                                // B2 = B + k + j*n;
+                                 C2 = C + i + j*n;
+                                 A2 = AT + k + i*n;
+                                 B2 = B + k + j*n;
 
                                 for( int ii = 0; ii < L; ++ii )
                                 {
@@ -80,7 +91,12 @@ void square_dgemm ( int n, double* A, double* B, double* C )
 
                                                 for( int kk = 0; kk < N; ++kk )
                                                 {
-                                                        C[ ii + jj*n +i + j*n ] += AT[ kk + ii*n + k + i*n] * B[ kk + jj*n +k + j*n ];
+                                                        int BLOCK_SIZE_2 = 50;
+                                                        int L2 = MIN( BLOCK_SIZE_2, (n - ii));
+                                                        int M2 = MIN(BLOCK_SIZE_2, (n - jj));
+                                                        int N2 = MIN(BLOCK_SIZE_2, (n - kk));
+                                                        do_block(n, L2, M2, N2, A2 + kk + ii*n, B2 + kk + jj*n, C2 + ii + jj*n);
+                                                        //C2[ ii + jj*n ] += A2[ kk + ii*n ] * B2[ kk + jj*n ];
                                                 }
                                                 //C2[ ii + jj*n ] = cij;
                                         }
