@@ -91,12 +91,12 @@ void square_dgemm ( int n, double* A, double* B, double* C )
 
                                                 for( int kk = 0; kk < N; ++kk )
                                                 {
-                                                        // int BLOCK_SIZE_2 = 20;
-                                                        // int L2 = MIN(BLOCK_SIZE_2, (L - ii));
-                                                        // int M2 = MIN(BLOCK_SIZE_2, ( M - jj));
-                                                        // int N2 = MIN(BLOCK_SIZE_2, (N - kk));
-                                                        // do_block(n, L2, M2, N2, A2 + kk + ii*n, B2 + kk + jj*n, C2 + ii + jj*n);
-                                                        C2[ ii + jj*n ] += A2[ kk + ii*n ] * B2[ kk + jj*n ];
+                                                        int BLOCK_SIZE_2 = 20;
+                                                        int L2 = MIN(BLOCK_SIZE_2, (BLOCK_SIZE- ii));
+                                                        int M2 = MIN(BLOCK_SIZE_2, (BLOCK_SIZE- jj));
+                                                        int N2 = MIN(BLOCK_SIZE_2, (BLOCK_SIZE - kk));
+                                                        do_block(n, L2, M2, N2, A2 + kk + ii*n, B2 + kk + jj*n, C2 + ii + jj*n);
+                                                        //C2[ ii + jj*n ] += A2[ kk + ii*n ] * B2[ kk + jj*n ];
                                                 }
                                                 //C2[ ii + jj*n ] = cij;
                                         }
