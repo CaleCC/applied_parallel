@@ -20,7 +20,7 @@ LDLIBS = -lrt -Wl,--start-group $(MKLROOT)/lib/intel64/libmkl_intel_lp64.a $(MKL
 
 const char* dgemm_desc = "Naive, three-loop dgemm.";
 
-static void do_block(int n, int L, int M, int N, double* A, double* B, double* c){
+static void do_block(int n, int L, int M, int N, double* A, double* B, double* C){
   for(int i = 0; i < L; ++i){
     for(int j = 0; j < M; j++){
       for(int k = 0; k < N; k++){
