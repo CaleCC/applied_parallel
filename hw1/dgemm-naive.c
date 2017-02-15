@@ -20,11 +20,11 @@ LDLIBS = -lrt -Wl,--start-group $(MKLROOT)/lib/intel64/libmkl_intel_lp64.a $(MKL
 
 const char* dgemm_desc = "Naive, three-loop dgemm.";
 
-static void do_block(int n, int L, int M, int N, double* A, double* B, double* C){
-  for(int i = 0; i < L; ++i){
-    for(int j = 0; j < M; j++){
-      for(int k = 0; k < N; k++){
-        C[ i + j*n ] += A[ k + i*n ] * B[ k + j*n  ];
+static void do_block(int n, int L2, int M2, int N2, double* A3, double* B3, double* C3){
+  for(int i3 = 0; i3 < L2; ++i3){
+    for(int j3 = 0; j3 < M2; j3++){
+      for(int k3 = 0; k3 < N2; k3++){
+        C3[ i3 + j3*n ] += A3[ k3 + i3*n ] * B3[ k3 + j3*n  ];
 
       }
     }
@@ -44,6 +44,9 @@ void square_dgemm ( int n, double* A, double* B, double* C )
         double *C2;
         double *B2;
         double *A2;
+        double *C3;
+        double *B3;
+        double *A3;
 
         /**
         *       Transpose the matrix
@@ -92,10 +95,21 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                                 for( int kk = 0; kk < N; ++kk )
                                                 {
                                                         int BLOCK_SIZE_2 = 20;
-                                                        int L2 = MIN(BLOCK_SIZE_2, (BLOCK_SIZE- ii));
-                                                        int M2 = MIN(BLOCK_SIZE_2, (BLOCK_SIZE- jj));
+                                                        int L2 = MIN(BLOCK_SIZE_2, (BLOCK_SIZE - ii));
+                                                        int M2 = MIN(BLOCK_SIZE_2, (BLOCK_SIZE - jj));
                                                         int N2 = MIN(BLOCK_SIZE_2, (BLOCK_SIZE - kk));
-                                                        do_block(n, L2, M2, N2, A2 + kk + ii*n, B2 + kk + jj*n, C2 + ii + jj*n);
+                                                        A3 = A2 + kk + ii*n;
+                                                        B3 = B2 + kk + jj*n;
+                                                        C3 = C2 + ii + jj*n;
+                                                        for(int i3 = 0; i3 < L2; ++i3){
+                                                          for(int j3 = 0; j3 < M2; j3++){
+                                                            for(int k3 = 0; k3 < N2; k3++){
+                                                              C3[ i3 + j3*n ] += A3[ k3 + i3*n ] * B3[ k3 + j3*n  ];
+
+                                                            }
+                                                          }
+                                                        }
+                                                        //do_block(n, L2, M2, N2, A2 + kk + ii*n, B2 + kk + jj*n, C2 + ii + jj*n);
                                                         //C2[ ii + jj*n ] += A2[ kk + ii*n ] * B2[ kk + jj*n ];
                                                 }
                                                 //C2[ ii + jj*n ] = cij;
