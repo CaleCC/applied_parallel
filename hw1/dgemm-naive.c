@@ -64,9 +64,9 @@ void square_dgemm ( int n, double* A, double* B, double* C )
         }
 
         // Calculate appropriate block size
-        int BLOCK_SIZE = 180;
+        int BLOCK_SIZE = 256;
         //int BLOCK_SIZE = 82;
-        /** For each row i of A */
+        /** For each row i of A d*/
         for( int i = 0; i < n; i += BLOCK_SIZE )
         {
                 /* For each column j of B */
