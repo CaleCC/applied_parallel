@@ -64,7 +64,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
         }
 
         // Calculate appropriate block size
-        int BLOCK_SIZE = 80;
+        int BLOCK_SIZE = 120;
         //int BLOCK_SIZE = 82;
         /** For each row i of A */
         for( int i = 0; i < n; i += BLOCK_SIZE )
@@ -94,7 +94,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
 
                                                 for( int kk = 0; kk < N; ++kk )
                                                 {
-                                                        int BLOCK_SIZE_2 = 40;
+                                                        int BLOCK_SIZE_2 = 80;
                                                         int L2 = MIN(BLOCK_SIZE_2, (BLOCK_SIZE - ii));
                                                         int M2 = MIN(BLOCK_SIZE_2, (BLOCK_SIZE - jj));
                                                         int N2 = MIN(BLOCK_SIZE_2, (BLOCK_SIZE - kk));
