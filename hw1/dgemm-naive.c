@@ -83,7 +83,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                  C2 = C + i + j*n;
                                  A2 = AT + k + i*n;
                                  B2 = B + k + j*n;
-                                 int BLOCK_SIZE_2 = 80;
+                                 int BLOCK_SIZE_2 = 12;
                                 for( int ii = 0; ii < L; ii += BLOCK_SIZE_2 )
                                 {
 
