@@ -1,6 +1,6 @@
 gcc vector inc
 4 DP (double precision) vector width and AVX Instruction set
 double float point 8 byte
-L1 32 KB, store 4096 elements i
-L2 256KB
+L1 32 KB, sqrt(32*1024/8)
+L2 256KB sqrt(256*1024/8) = 181
 L3 20MB by all
