@@ -83,21 +83,21 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                  C2 = C + i + j*n;
                                  A2 = AT + k + i*n;
                                  B2 = B + k + j*n;
-
-                                for( int ii = 0; ii < L; ++ii )
+                                 int BLOCK_SIZE_2 = 80;
+                                for( int ii = 0; ii < L; ii += BLOCK_SIZE_2 )
                                 {
 
-                                        for( int jj = 0; jj < M; ++jj )
+                                        for( int jj = 0; jj < M; jj+= BLOCK_SIZE_2 )
                                         {
                                                 /* Compute C(i,j) */
                                                 //double cij = C2[ ii + jj*n ];
 
-                                                for( int kk = 0; kk < N; ++kk )
+                                                for( int kk = 0; kk < N; kk+=BLOCK_SIZE_2 )
                                                 {
-                                                        int BLOCK_SIZE_2 = 80;
-                                                        int L2 = MIN(BLOCK_SIZE_2, (BLOCK_SIZE - ii));
-                                                        int M2 = MIN(BLOCK_SIZE_2, (BLOCK_SIZE - jj));
-                                                        int N2 = MIN(BLOCK_SIZE_2, (BLOCK_SIZE - kk));
+
+                                                        int L2 = MIN(BLOCK_SIZE_2, (L- ii));
+                                                        int M2 = MIN(BLOCK_SIZE_2, (M - jj));
+                                                        int N2 = MIN(BLOCK_SIZE_2, (N - kk));
                                                         A3 = A2 + kk + ii*n;
                                                         B3 = B2 + kk + jj*n;
                                                         C3 = C2 + ii + jj*n;
