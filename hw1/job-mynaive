@@ -3,7 +3,7 @@
 #SBATCH -p normal
 #SBATCH -t 00:10:00
 #SBATCH -J Blas_job
-#SBATCH -o MyOutputFile.%j.out
-#SBATCH -e MyErrorFile.%j.err
+#SBATCH -o perfOut.%j.out
+#SBATCH -e perfError.%j.err
 
-perfexpert 0.5 -r 5 ./benchmark-blas
+perfexpert 0.1 -r 5 ./benchmark-naive
