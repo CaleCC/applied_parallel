@@ -83,7 +83,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                  C2 = C + i + j*n;
                                  A2 = AT + k + i*n;
                                  B2 = B + k + j*n;
-                                 int BLOCK_SIZE_2 = 100;
+                                 int BLOCK_SIZE_2 = 38;
                                 for( int ii = 0; ii < L; ii += BLOCK_SIZE_2 )
                                 {
 
@@ -102,7 +102,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                                         B3 = B2 + kk + jj*n;
                                                         C3 = C2 + ii + jj*n;
                                                         //malloc the size for packing
-                                                        /*double * AN = (double*)calloc(L2*N2,sizeof(double));
+                                                        double * AN = (double*)calloc(L2*N2,sizeof(double));
                                                         double * BN = (double*)calloc(N2*M2, sizeof(double));
                                                         double * CN = (double*)calloc(L2*M2, sizeof(double));
                                                         //move them into the location
@@ -135,15 +135,15 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                                         }
                                                         free(AN);
                                                         free(BN);
-                                                        free(CN);*/
-                                                        for(int i3 = 0; i3 < L2; ++i3){
-                                                          for(int j3 = 0; j3 < M2; j3++){
-                                                            for(int k3 = 0; k3 < N2; k3++){
-                                                              C3[ i3 + j3*n ] += A3[ k3 + i3*n ] * B3[ k3 + j3*n  ];
-
-                                                            }
-                                                          }
-                                                        }
+                                                        free(CN);
+                                                        // for(int i3 = 0; i3 < L2; ++i3){
+                                                        //   for(int j3 = 0; j3 < M2; j3++){
+                                                        //     for(int k3 = 0; k3 < N2; k3++){
+                                                        //       C3[ i3 + j3*n ] += A3[ k3 + i3*n ] * B3[ k3 + j3*n  ];
+                                                        //
+                                                        //     }
+                                                        //   }
+                                                        // }
                                                         //do_block(n, L2, M2, N2, A2 + kk + ii*n, B2 + kk + jj*n, C2 + ii + jj*n);
                                                         //C2[ ii + jj*n ] += A2[ kk + ii*n ] * B2[ kk + jj*n ];
                                                 }
