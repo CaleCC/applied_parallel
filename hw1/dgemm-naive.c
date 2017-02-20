@@ -132,7 +132,9 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                                             C3[q + p*n] = CN[q + p*L2];
                                                           }
                                                         }
-
+                                                        free(AN);
+                                                        free(BN);
+                                                        free(CN);
                                                         // for(int i3 = 0; i3 < L2; ++i3){
                                                         //   for(int j3 = 0; j3 < M2; j3++){
                                                         //     for(int k3 = 0; k3 < N2; k3++){
@@ -150,8 +152,6 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                         }
                 }
         }
-        free(AN);
-        free(BN);
-        free(CN);
+
         free(AT);
 }
