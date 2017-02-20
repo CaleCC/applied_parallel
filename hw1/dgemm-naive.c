@@ -104,7 +104,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                                         //malloc the size for packing
                                                         double * AN = malloc(L2*N2*sizeof(double*));
                                                         double * BN = malloc(L2*N2*sizeof(double*));
-                                                        double * CN = malloc(L2*M2*sizeof(double*));
+                                                        double * CN = calloc(L2*M2*sizeof(double*));
                                                         //move them into the location
                                                         for(int p = 0; p < L2; p++){
                                                           for(int q = 0; q < N2; q++){
