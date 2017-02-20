@@ -95,14 +95,14 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                                 for( int kk = 0; kk < N; kk+=BLOCK_SIZE_2 )
                                                 {
 
-                                                        /*int L2 = MIN(BLOCK_SIZE_2, (L- ii));//number of row of AT
+                                                        int L2 = MIN(BLOCK_SIZE_2, (L- ii));//number of row of AT
                                                         int M2 = MIN(BLOCK_SIZE_2, (M - jj));//number of row of b
                                                         int N2 = MIN(BLOCK_SIZE_2, (N - kk));//number of col of AT and B
                                                         A3 = A2 + kk + ii*n;
                                                         B3 = B2 + kk + jj*n;
                                                         C3 = C2 + ii + jj*n;
                                                         //malloc the size for packing
-                                                        double * AN = (double*)calloc(L2*N2,sizeof(double));
+                                                        /*double * AN = (double*)calloc(L2*N2,sizeof(double));
                                                         double * BN = (double*)calloc(N2*M2, sizeof(double));
                                                         double * CN = (double*)calloc(L2*M2, sizeof(double));
                                                         //move them into the location
