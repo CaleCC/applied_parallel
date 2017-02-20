@@ -39,7 +39,7 @@ static void do_block(int n, int L2, int M2, int N2, double* A3, double* B3, doub
 void square_dgemm ( int n, double* A, double* B, double* C )
 {
 
-        double * AT = malloc( n*n*sizeof( double* ) );
+        double * AT = malloc( n*n*sizeof( double ) );
 
         double *C2;
         double *B2;
@@ -101,7 +101,8 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                                         A3 = A2 + kk + ii*n;
                                                         B3 = B2 + kk + jj*n;
                                                         C3 = C2 + ii + jj*n;
-                                                        for(int i3 = 0; i3 < L2; ++i3){
+                                                        double * AN = malloc(L2*L2*sizeof(double*));
+                                                        double * BN = malloc(L2*L2*sizeof(double*));                                                        for(int i3 = 0; i3 < L2; ++i3){
                                                           for(int j3 = 0; j3 < M2; j3++){
                                                             for(int k3 = 0; k3 < N2; k3++){
                                                               C3[ i3 + j3*n ] += A3[ k3 + i3*n ] * B3[ k3 + j3*n  ];
