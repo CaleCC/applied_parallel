@@ -95,9 +95,9 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                                 for( int kk = 0; kk < N; kk+=BLOCK_SIZE_2 )
                                                 {
 
-                                                        int L2 = MIN(BLOCK_SIZE_2, (L- ii));//number of col for A also number of row for B
-                                                        int M2 = MIN(BLOCK_SIZE_2, (M - jj));//number of col for B also number of col for A
-                                                        int N2 = MIN(BLOCK_SIZE_2, (N - kk));//number of row and col for
+                                                        int L2 = MIN(BLOCK_SIZE_2, (L- ii));//number of row of AT
+                                                        int M2 = MIN(BLOCK_SIZE_2, (M - jj));//number of row of b
+                                                        int N2 = MIN(BLOCK_SIZE_2, (N - kk));//number of col of AT and B
                                                         A3 = A2 + kk + ii*n;
                                                         B3 = B2 + kk + jj*n;
                                                         C3 = C2 + ii + jj*n;
@@ -123,11 +123,11 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                                         for(int i3 = 0; i3 < L2; ++i3){
                                                           for(int j3 = 0; j3 < M2; j3++){
                                                             for(int k3 = 0; k3 < N2; k3++){
-                                                              CN[i3 + j3*L2] += AN[k3 + i3*N2] * BN[k3 + j3*N2 ];//change l2 to M2 if compile wrong
+                                                              CN[i3 + j3*M2] += AN[k3 + i3*N2] * BN[k3 + j3*N2 ];//change l2 to M2 if compile wrong
                                                             }
                                                           }
                                                         }
-                                                        //copy back to the result
+                                                        //copy result back to the C
                                                         for(int p = 0; p < L2; p++){
                                                           for(int q = 0; q < M2; q++){
                                                             C3[q + p*n] += CN[q + p*L2];
