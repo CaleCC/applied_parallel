@@ -83,7 +83,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                  C2 = C + i + j*n;
                                  A2 = AT + k + i*n;
                                  B2 = B + k + j*n;
-                                 int BLOCK_SIZE_2 = 64;
+                                 int BLOCK_SIZE_2 = 100;
                                 for( int ii = 0; ii < L; ii += BLOCK_SIZE_2 )
                                 {
 
@@ -102,8 +102,8 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                                         B3 = B2 + kk + jj*n;
                                                         C3 = C2 + ii + jj*n;
                                                         //malloc the size for packing
-                                                        double * AN = malloc(L2*N2*sizeof(double));
-                                                        double * BN = malloc(N2*M2*sizeof(double));
+                                                        double * AN = (double*)calloc(L2*N2,sizeof(double));
+                                                        double * BN = (double*)calloc(N2*M2, sizeof(double));
                                                         double * CN = (double*)calloc(L2*M2, sizeof(double));
                                                         //move them into the location
                                                         for(int p = 0; p < L2; p++){
