@@ -114,7 +114,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                                         }
                                                         for(int p = 0; p < M2; p++){
                                                           for(int q = 0; q < N2; q++){
-                                                            AN[q + p*N2] = A3[q + p*n];
+                                                            //AN[q + p*N2] = A3[q + p*n];
                                                             BN[q + p*N2] = B3[q + p*n];
                                                           }
                                                         }
