@@ -123,7 +123,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
                                                         for(int i3 = 0; i3 < L2; ++i3){
                                                           for(int j3 = 0; j3 < M2; j3++){
                                                             for(int k3 = 0; k3 < N2; k3++){
-                                                              CN[i3 + j3*M2] += AN[k3 + i3*N2] * BN[k3 + j3*N2 ];//change l2 to M2 if compile wrong
+                                                              CN[i3 + j3*L2] += AN[k3 + i3*N2] * BN[k3 + j3*N2 ];//change l2 to M2 if compile wrong
                                                             }
                                                           }
                                                         }
