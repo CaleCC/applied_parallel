@@ -7,24 +7,8 @@ const char* dgemm_desc = "Naive, three-loop dgemm.";
 #define A(i,j) A[(j)*n + (i)]
 #define B(i,j) B[(j)*n + (i)]
 #define C(i,j) C[(j)*n + (i)]
-void SSEmulti(int, double*,  double*, double *)
-
-
-void square_dgemm ( int n, double* A, double* B, double* C )
-{
-  int i = 0;
-  int j = 0;
-  //for each columns of C
-  for(j = 0; j < n; j+=4){
-    //for each row of C
-    for(i = 0 ; i < n; i+=1){
-      SSEmulti(n, &A(i,0),&B(0,j),&C(i,j));
-    }
-  }
-}
-
-
-void SSEmulti(int k, double *a, double*b,double *c){
+//void Mymulti(int, double*,  double*, double *)
+void Mymulti(int k, double *a, double*b,double *c){
   int l;
   register double
     c_00_reg, c_01_reg, c_02_reg, c_03_reg,
@@ -80,4 +64,17 @@ void SSEmulti(int k, double *a, double*b,double *c){
   C(0,1) += c_01_reg;
   C(0, 2) += c_02_reg;
   c(0,3) += c_03_reg;
+}
+
+void square_dgemm ( int n, double* A, double* B, double* C )
+{
+  int i = 0;
+  int j = 0;
+  //for each columns of C
+  for(j = 0; j < n; j+=4){
+    //for each row of C
+    for(i = 0 ; i < n; i+=1){
+      Mymulti(n, &A(i,0),&B(0,j),&C(i,j));
+    }
+  }
 }
