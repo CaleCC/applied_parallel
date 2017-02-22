@@ -1,4 +1,5 @@
 #include<stdlib.h>
+#include<stdio.h>
 const char* dgemm_desc = "Naive, three-loop dgemm.";
 
 
