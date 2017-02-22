@@ -63,7 +63,7 @@ void Mymulti(int n, double *A, double* B,double *C){
   C(0,0) += c_00_reg;
   C(0,1) += c_01_reg;
   C(0,2) += c_02_reg;
-  c(0,3) += c_03_reg;
+  C(0,3) += c_03_reg;
 }
 
 void square_dgemm ( int n, double* A, double* B, double* C )
