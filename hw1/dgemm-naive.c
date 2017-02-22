@@ -76,7 +76,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
   for(j = 0; j < n; j+=4){
     //for each row of C
     for(i = 0 ; i < n; i+=1){
-      prinf("debig 1\n");
+      printf("debig 1\n");
       Mymulti(n, &A(i,0),&B(0,j),&C(i,j));
     }
   }
