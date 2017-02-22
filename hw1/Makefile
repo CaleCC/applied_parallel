@@ -1,7 +1,7 @@
 # On Trestles we will check versus your performance versus Intel MKL library's BLAS.
 
-CC = gcc
-OPT = -O2
+CC = icc
+OPT = -O3
 CFLAGS = -Wall -std=gnu99  -g -msse3 $(OPT)
 #CFLAGS = -Wall  -g -msse3 $(OPT)
 #MKLROOT = /opt/intel/composer_xe_2013.1.117/mkl
