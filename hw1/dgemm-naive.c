@@ -10,7 +10,7 @@ const char* dgemm_desc = "Naive, three-loop dgemm.";
 //void Mymulti(int, double*,  double*, double *)
 void Mymulti(int n, double *A, double* B,double *C){
   int l;
-  printf("debig 2\n");
+  //printf("debig 2\n");
   register double
     c_00_reg, c_01_reg, c_02_reg, c_03_reg,
     a_0l_reg;//A(0,l)
@@ -26,7 +26,7 @@ void Mymulti(int n, double *A, double* B,double *C){
   c_01_reg = 0.0;
   c_02_reg = 0.0;
   c_03_reg = 0.0;
-  printf("debig 3\n");
+  //printf("debig 3\n");
   for(l = 0; l < n; l += 4){
     a_0l_reg = A(0,l);
 
@@ -34,7 +34,7 @@ void Mymulti(int n, double *A, double* B,double *C){
     c_01_reg += a_0l_reg * *(bl1_pntr);
     c_02_reg += a_0l_reg * *(bl2_pntr);
     c_03_reg += a_0l_reg * *(bl3_pntr);
-    printf("debig 4\n");
+    //printf("debig 4\n");
     a_0l_reg = A(0,l+1);
 
     c_00_reg += a_0l_reg * *(bl0_pntr+1);
@@ -43,7 +43,7 @@ void Mymulti(int n, double *A, double* B,double *C){
     c_03_reg += a_0l_reg * *(bl3_pntr+1);
 
     a_0l_reg = A(0,l+2);
-    printf("debig 5\n");
+
     c_00_reg += a_0l_reg * *(bl0_pntr+2);
     c_01_reg += a_0l_reg * *(bl1_pntr+2);
     c_02_reg += a_0l_reg * *(bl2_pntr+2);
@@ -73,10 +73,11 @@ void square_dgemm ( int n, double* A, double* B, double* C )
   int i = 0;
   int j = 0;
   //for each columns of C
+    printf("debig 1\n");
   for(j = 0; j < n; j+=4){
     //for each row of C
     for(i = 0 ; i < n; i+=1){
-      printf("debig 1\n");
+      //printf("debig 1\n");
       Mymulti(n, &A(i,0),&B(0,j),&C(i,j));
     }
   }
