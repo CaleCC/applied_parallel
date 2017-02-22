@@ -9,7 +9,7 @@ const char* dgemm_desc = "Naive, three-loop dgemm.";
 #define B(i,j) B[(j)*n + (i)]
 #define C(i,j) C[(j)*n + (i)]
 //void Mymulti(int, double*,  double*, double *)
-void Mymulti(int k, double *A, double* B,double *C){
+void Mymulti(int n, double *A, double* B,double *C){
   /* So, this routine computes a 4x4 block of matrix A
             C( 0, 0 ), C( 0, 1 ), C( 0, 2 ), C( 0, 3 ).
             C( 1, 0 ), C( 1, 1 ), C( 1, 2 ), C( 1, 3 ).
@@ -65,7 +65,7 @@ void Mymulti(int k, double *A, double* B,double *C){
    c_20_reg = 0.0;   c_21_reg = 0.0;   c_22_reg = 0.0;   c_23_reg = 0.0;
    c_30_reg = 0.0;   c_31_reg = 0.0;   c_32_reg = 0.0;   c_33_reg = 0.0;
 
-   for ( p=0; p<k; p++ ){
+   for ( p=0; p<n; p++ ){
      a_0p_reg = A( 0, p );
      a_1p_reg = A( 1, p );
      a_2p_reg = A( 2, p );
