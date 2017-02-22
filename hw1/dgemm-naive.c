@@ -8,7 +8,7 @@ const char* dgemm_desc = "Naive, three-loop dgemm.";
 #define B(i,j) B[(j)*n + (i)]
 #define C(i,j) C[(j)*n + (i)]
 //void Mymulti(int, double*,  double*, double *)
-void Mymulti(int k, double *a, double*b,double *c){
+void Mymulti(int k, double *A, double* B,double *C){
   int l;
   register double
     c_00_reg, c_01_reg, c_02_reg, c_03_reg,
