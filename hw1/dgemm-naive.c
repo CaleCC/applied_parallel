@@ -44,7 +44,7 @@ void Mymulti(int n, double *A, double* B,double *C){
   c_31_reg = 0.0;
   c_32_reg = 0.0;
   c_33_reg = 0.0;
-  for(l = 0; l < n; l ++){
+  for(l = 0; l < n; l++){
     a_0l_reg = A(0,l);
     a_1l_reg = A(1,l);
     a_2l_reg = A(2,l);
@@ -73,10 +73,10 @@ void Mymulti(int n, double *A, double* B,double *C){
     c_32_reg += a_3l_reg * *(bl2_pntr);
     c_33_reg += a_3l_reg * *(bl3_pntr);
 
-    bl0_pntr+=1;
-    bl1_pntr+=1;
-    bl2_pntr+=1;
-    bl3_pntr+=1;
+    bl0_pntr++;
+    bl1_pntr++;
+    bl2_pntr++;
+    bl3_pntr++;
   }
   C(0,0) += c_00_reg; C(0,1) += c_01_reg; C(0,2) += c_02_reg; C(0,3) += c_03_reg;
   C(1,0) += c_10_reg; C(1,1) += c_11_reg; C(1,2) += c_12_reg; C(1,3) += c_13_reg;
