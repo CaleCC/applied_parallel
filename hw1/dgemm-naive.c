@@ -22,65 +22,60 @@ typedef union
 
 void Mymulti(int n, double *A, double* B,double *C){
   int p;
-  register double
-    /* hold contributions to
-       C( 0, 0 ), C( 0, 1 ), C( 0, 2 ), C( 0, 3 ) */
-       c_00_reg,   c_01_reg,   c_02_reg,   c_03_reg,
-    /* holds A( 0, p ) */
-       a_0p_reg;
-  double
-    /* Point to the current elements in the four columns of B */
-    *bp0_pntr, *bp1_pntr, *bp2_pntr, *bp3_pntr;
+ register double
+   /* hold contributions to
+      C( 0, 0 ), C( 0, 1 ), C( 0, 2 ), C( 0, 3 ) */
+      c_00_reg,   c_01_reg,   c_02_reg,   c_03_reg,
+   /* holds A( 0, p ) */
+      a_0p_reg;
+ double
+   /* Point to the current elements in the four columns of B */
+   *bp0_pntr, *bp1_pntr, *bp2_pntr, *bp3_pntr;
 
-  bp0_pntr = &B( 0, 0 );
-  bp1_pntr = &B( 0, 1 );
-  bp2_pntr = &B( 0, 2 );
-  bp3_pntr = &B( 0, 3 );
+ bp0_pntr = &B( 0, 0 );
+ bp1_pntr = &B( 0, 1 );
+ bp2_pntr = &B( 0, 2 );
+ bp3_pntr = &B( 0, 3 );
 
-  c_00_reg = 0.0;
-  c_01_reg = 0.0;
-  c_02_reg = 0.0;
-  c_03_reg = 0.0;
+ c_00_reg = 0.0;
+ c_01_reg = 0.0;
+ c_02_reg = 0.0;
+ c_03_reg = 0.0;
 
-  for ( p=0; p<n; p+=4 ){
-    a_0p_reg = A( 0, p );
+ for ( p=0; p<n; p+=4 ){
+   a_0p_reg = A( 0, p );
 
-    c_00_reg += a_0p_reg * *bp0_pntr;
-    c_01_reg += a_0p_reg * *bp1_pntr;
-    c_02_reg += a_0p_reg * *bp2_pntr;
-    c_03_reg += a_0p_reg * *bp3_pntr;
+   c_00_reg += a_0p_reg * *bp0_pntr++;
+   c_01_reg += a_0p_reg * *bp1_pntr++;
+   c_02_reg += a_0p_reg * *bp2_pntr++;
+   c_03_reg += a_0p_reg * *bp3_pntr++;
 
-    a_0p_reg = A( 0, p+1 );
+   a_0p_reg = A( 0, p+1 );
 
-    c_00_reg += a_0p_reg * *(bp0_pntr+1);
-    c_01_reg += a_0p_reg * *(bp1_pntr+1);
-    c_02_reg += a_0p_reg * *(bp2_pntr+1);
-    c_03_reg += a_0p_reg * *(bp3_pntr+1);
+   c_00_reg += a_0p_reg * *bp0_pntr++;
+   c_01_reg += a_0p_reg * *bp1_pntr++;
+   c_02_reg += a_0p_reg * *bp2_pntr++;
+   c_03_reg += a_0p_reg * *bp3_pntr++;
 
-    a_0p_reg = A( 0, p+2 );
+   a_0p_reg = A( 0, p+2 );
 
-    c_00_reg += a_0p_reg * *(bp0_pntr+2);
-    c_01_reg += a_0p_reg * *(bp1_pntr+2);
-    c_02_reg += a_0p_reg * *(bp2_pntr+2);
-    c_03_reg += a_0p_reg * *(bp3_pntr+2);
+   c_00_reg += a_0p_reg * *bp0_pntr++;
+   c_01_reg += a_0p_reg * *bp1_pntr++;
+   c_02_reg += a_0p_reg * *bp2_pntr++;
+   c_03_reg += a_0p_reg * *bp3_pntr++;
 
-    a_0p_reg = A( 0, p+3 );
+   a_0p_reg = A( 0, p+3 );
 
-    c_00_reg += a_0p_reg * *(bp0_pntr+3);
-    c_01_reg += a_0p_reg * *(bp1_pntr+3);
-    c_02_reg += a_0p_reg * *(bp2_pntr+3);
-    c_03_reg += a_0p_reg * *(bp3_pntr+3);
+   c_00_reg += a_0p_reg * *bp0_pntr++;
+   c_01_reg += a_0p_reg * *bp1_pntr++;
+   c_02_reg += a_0p_reg * *bp2_pntr++;
+   c_03_reg += a_0p_reg * *bp3_pntr++;
+ }
 
-    bp0_pntr+=4;
-    bp1_pntr+=4;
-    bp2_pntr+=4;
-    bp3_pntr+=4;
-}
-
-C( 0, 0 ) += c_00_reg;
-C( 0, 1 ) += c_01_reg;
-C( 0, 2 ) += c_02_reg;
-C( 0, 3 ) += c_03_reg;
+ C( 0, 0 ) += c_00_reg;
+ C( 0, 1 ) += c_01_reg;
+ C( 0, 2 ) += c_02_reg;
+ C( 0, 3 ) += c_03_reg;
 }
 
 
@@ -107,10 +102,8 @@ void square_dgemm ( int n, double* A, double* B, double* C )
   //for each columns of C
     //printf("debig 1\n");
   int p = n-n%4;
-  printf("ddd0\n");
   for(j = 0; j < p; j+=4){
     //for each row of C
-      printf("ddd1\n");
     for(i = 0 ; i < p; i+=4){
       Mymulti(n, &A(i,0),&B(0,j),&C(i,j));
     }
