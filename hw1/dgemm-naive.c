@@ -136,7 +136,7 @@ void PackMatrixA(int k, double *A, int lda, double *a_to){
   }
 }
 
-void PackMatrixB(int k, double *b,int ldb, double *b_to){
+void PackMatrixB(int k, double *B,int ldb, double *b_to){
   int i;
   double
   *b_i0_pntr = &B( 0, 0 ), *b_i1_pntr = &B( 0, 1 ),
