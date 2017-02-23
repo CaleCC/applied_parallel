@@ -199,7 +199,7 @@ void InnerKernel(int m, int n, int k,double*A, int lda,
         PackMatrixA(k, &A(i,0), lda, &packedA[i*k]);
       }*/
       for(int w= 0; w < k;w+=4){
-        Mymulti(4, A(i,w),4,B(w,j),4,&C(i,j),ldc);
+        Mymulti(4, &A(i,w),4,&B(w,j),4,&C(i,j),ldc);
       }
     }
   }
