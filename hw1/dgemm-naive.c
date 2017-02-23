@@ -122,6 +122,21 @@ void AddDot( int n, double *x,   double *y, double *gamma ,int len)
 #define mc 128
 #define kc 128
 
+void PackMatrixA(int k, double *a, int lda, double *a_to){
+  int j;
+
+  for(j = 0; j < k; j++){
+    double *a_ij_pntr = &A(0,j);
+    *a_to++ = *a_ij_pntr;
+    *a_to++ = *(a_ij_pntr+1);
+    *a_to++ = *(a_ij_pntr+2);
+    *a_to++ = *(a_ij_pntr+3);
+
+  }
+}
+
+
+
 
 void InnerKernel(int m, int n, int k,double*A, double*B, double*C,int len){
   int i,j;
@@ -136,18 +151,6 @@ void InnerKernel(int m, int n, int k,double*A, double*B, double*C,int len){
     }
   }
 
-  void PackMatrixA(int k, double *a, int lda, double *a_to){
-    int j;
-
-    for(j = 0; j < k; j++){
-      double *a_ij_pntr = &A(0,j);
-      *a_to++ = *a_ij_pntr;
-      *a_to++ = *(a_ij_pntr+1);
-      *a_to++ = *(a_ij_pntr+2);
-      *a_to++ = *(a_ij_pntr+3);
-
-    }
-  }
 
 
   for(j = p; j <n; j++){
