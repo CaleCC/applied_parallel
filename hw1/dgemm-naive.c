@@ -162,10 +162,10 @@ void square_dgemm ( int n, double* A, double* B, double* C )
 
   int p,pb,ib;
 
-  for(p = 0; p<k; p+=kc){
-    pb = min(k-p, kc);
-    for(i = 0; i<m; i+=mc){
-      ib = min(m - i, mc);
+  for(p = 0; p<n; p+=kc){
+    pb = min(n-p, kc);
+    for(i = 0; i<n; i+=mc){
+      ib = min(n - i, mc);
       InnerKernel(ib, n, pb, &A(i,p), &B(p,0),&C(i,0));
     }
   }
