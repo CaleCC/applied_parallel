@@ -142,7 +142,7 @@ void InnerKernel(int m, int n, int k,double*A, double*B, double*C,int len){
   int i,j;
   int p = n-n%4;
   int q = m-m%4;
-  double packedA[m*k];
+  double packedA[q*k];
   for(j = 0; j < p; j+=4){
     //for each row of C
     for(i = 0 ; i < q; i+=4){
