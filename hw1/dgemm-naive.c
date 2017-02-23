@@ -200,15 +200,15 @@ void AddDot( int n, double *x,   double *y, double *gamma ,int len)
 
   int p;
   register double
-  a_0p,
-  c_00;
+  a_0p_reg,
+  c_00_reg;
   double * b_p0_pntr;
-  b_p0_pntr = y[0];
+  b_p0_pntr = &y[0];
   c_00_reg = *gamma;
 
 
   for ( p=0; p<n; p++ ){
-    a_0p = X(p);
+    a_0p_reg = X(p);
     c_00_reg += a_0p * * b_p0_pntr++;
   }
   *gamma = c_00_reg;
