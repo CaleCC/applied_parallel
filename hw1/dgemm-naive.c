@@ -84,40 +84,25 @@ void square_dgemm ( int n, double* A, double* B, double* C )
   int j = 0;
   //for each columns of C
     //printf("debig 1\n");
-  for ( j=0; j<n; j+=1 ){        /* Loop over the columns of C */
-    for ( i=0; i<n; i+=1 ){        /* Loop over the rows of C */
-      /* Update the C( i,j ) with the inner product of the ith row of A
-     and the jth column of B */
-
-      AddDot( n, &A( i,0 ), &B( 0,j ), &C( i,j ) );
+  int p = n-n%4;
+  for(j = 0; j < p; j+=4){
+    //for each row of C
+    for(i = 0 ; i < n; i+=4){
+      //printf("debig 1\n");
+      if(i + 4 > n){
+        while(i < n){
+          AddDot(n, &A(i,0),&B(0,j),&C(i,j));
+          i++;
+        }
+      }else{
+        Mymulti(n, &A(i,0),&B(0,j),&C(i,j));
+      }
     }
   }
-  // for(j = 0; j < n; j+=4){
-  //   //for each row of C
-  //   if(j + 4 > n){
-  //     for(int j1 = j; j1 < n; j1++){
-  //       //for each row of C
-  //       for(int i1 = 0; i1 < n; i1++){
-  //         //printf("debig 1\n");
-  //
-  //         AddDot(n, &A(i1,0),&B(0,j1),&C(i1,j1));
-  //       }
-  //     }
-  //     break;
-  //   }
-  //   for(i = 0 ; i < n; i+=4){
-  //     //printf("debig 1\n");
-  //     if(i + 4 > n){
-  //       while(i < n){
-  //         AddDot(n, &A(i,0),&B(0,j),&C(i,j));
-  //         i++;
-  //       }
-  //     }else{
-  //       Mymulti(n, &A(i,0),&B(0,j),&C(i,j));
-  //     }
-  //
-  //
-  //   }
-  // }
+  for(j = p; j <n;j++){
+    for(i = 0; i < n; i++){
+      AddDot(n, &A(i,0),&B(0,j),&C(i,j));
+    }
+  }
 
 }
