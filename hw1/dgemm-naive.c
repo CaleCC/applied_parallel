@@ -190,16 +190,16 @@ void InnerKernel(int m, int n, int k,double*A, int lda,
   double packedB[kc*nb];
   for(j = 0; j < p; j+=4){
     //for each row of C
-    if(first_pack){
+    /*if(first_pack){
       PackMatrixB(k, &B(0,j),ldb,&packedB[j*k]);
-    }
+    }*/
     //for each col of C
     for(i = 0 ; i < q; i+=4){
-      if(j == 0){
+      /*if(j == 0){
         PackMatrixA(k, &A(i,0), lda, &packedA[i*k]);
-      }
+      }*/
       for(int w= 0; w < k;w+=4){
-        Mymulti(4, &packedA[i*k+w],4,&packedB[j*k+w],4,&C(i,j),ldc);
+        Mymulti(4, A(i,w),4,B(w,j),4,&C(i,j),ldc);
       }
     }
   }
