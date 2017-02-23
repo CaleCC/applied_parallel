@@ -19,31 +19,83 @@ const char* dgemm_desc = "Naive, three-loop dgemm.";
 void Mymulti(int k, double *A,int lda, double* B,int  ldb,
                                        double *C, int ldc){
 
+   int p;
+   v2df_t
+     c_00_c_10_vreg,    c_01_c_11_vreg,    c_02_c_12_vreg,    c_03_c_13_vreg,
+     c_20_c_30_vreg,    c_21_c_31_vreg,    c_22_c_32_vreg,    c_23_c_33_vreg,
+     a_0p_a_1p_vreg,
+     a_2p_a_3p_vreg,
+     b_p0_vreg, b_p1_vreg, b_p2_vreg, b_p3_vreg;
 
+   c_00_c_10_vreg.v = _mm_setzero_pd();
+   c_01_c_11_vreg.v = _mm_setzero_pd();
+   c_02_c_12_vreg.v = _mm_setzero_pd();
+   c_03_c_13_vreg.v = _mm_setzero_pd();
+   c_20_c_30_vreg.v = _mm_setzero_pd();
+   c_21_c_31_vreg.v = _mm_setzero_pd();
+   c_22_c_32_vreg.v = _mm_setzero_pd();
+   c_23_c_33_vreg.v = _mm_setzero_pd();
 
-  __m256d c1 = _mm256_loadu_pd(&C(0,0));	// load first row of C
- 	__m256d c2 = _mm256_loadu_pd(&C(1,0));	// load second row of C
- 	__m256d c3 = _mm256_loadu_pd(&C(2,0));	// load third row of C
- 	__m256d c4 = _mm256_loadu_pd(&C(3,0));	// load fourth row of C
+   for ( p=0; p<k; p++ ){
+     a_0p_a_1p_vreg.v = _mm_load_pd( (double *) a );
+     a_2p_a_3p_vreg.v = _mm_load_pd( (double *) ( a+2 ) );
+     a += 4;
 
-  for(int i = 0; i < k; i++){
-    __m256d a = _mm256_loadu_pd(&A(i,0));		// Load ith row of A; a = <ai0, ai1, ai2, ai3>
-    __m256d b1 = _mm256_broadcast_sd(&B(i,0));	// create vector b1 = <B+i+0*n, B+i+0*n, B+i+0*n, B+i+0*n>
-    __m256d b2 = _mm256_broadcast_sd(&B(i,1));	// create vector b2 = <B+i+1*n, B+i+1*n, B+i+1*n, B+i+1*n>
-    __m256d b3 = _mm256_broadcast_sd(&B(i,2));	// create vector b3 = <B+i+2*n, B+i+2*n, B+i+2*n, B+i+2*n>
-    __m256d b4 = _mm256_broadcast_sd(&B(i,3));	// create vector b4 = <B+i+3*n, B+i+3*n, B+i+3*n, B+i+3*n>
+     b_p0_vreg.v = _mm_loaddup_pd( (double *) b );       /* load and duplicate */
+     b_p1_vreg.v = _mm_loaddup_pd( (double *) (b+1) );   /* load and duplicate */
+     b_p2_vreg.v = _mm_loaddup_pd( (double *) (b+2) );   /* load and duplicate */
+     b_p3_vreg.v = _mm_loaddup_pd( (double *) (b+3) );   /* load and duplicate */
 
-    c1 = _mm256_add_pd(c1, _mm256_mul_pd(a,b1));	// c1 = c1 + a * b1
-    c2 = _mm256_add_pd(c2, _mm256_mul_pd(a,b2));	// c2 = c2 + a * b2
-    c3 = _mm256_add_pd(c3, _mm256_mul_pd(a,b3));	// c3 = c3 + a * b3
-    c4 = _mm256_add_pd(c4, _mm256_mul_pd(a,b4));	// c4 = c4 + a * b4
+     b += 4;
 
-  }
+     /* First row and second rows */
+     c_00_c_10_vreg.v += a_0p_a_1p_vreg.v * b_p0_vreg.v;
+     c_01_c_11_vreg.v += a_0p_a_1p_vreg.v * b_p1_vreg.v;
+     c_02_c_12_vreg.v += a_0p_a_1p_vreg.v * b_p2_vreg.v;
+     c_03_c_13_vreg.v += a_0p_a_1p_vreg.v * b_p3_vreg.v;
 
-  _mm256_storeu_pd(&C(0,0), c1);
-  _mm256_storeu_pd(&C(1,0), c2);
-  _mm256_storeu_pd(&C(2,0), c3);
-  _mm256_storeu_pd(&C(3,0), c4);
+     /* Third and fourth rows */
+     c_20_c_30_vreg.v += a_2p_a_3p_vreg.v * b_p0_vreg.v;
+     c_21_c_31_vreg.v += a_2p_a_3p_vreg.v * b_p1_vreg.v;
+     c_22_c_32_vreg.v += a_2p_a_3p_vreg.v * b_p2_vreg.v;
+     c_23_c_33_vreg.v += a_2p_a_3p_vreg.v * b_p3_vreg.v;
+   }
+
+   C( 0, 0 ) += c_00_c_10_vreg.d[0];  C( 0, 1 ) += c_01_c_11_vreg.d[0];
+   C( 0, 2 ) += c_02_c_12_vreg.d[0];  C( 0, 3 ) += c_03_c_13_vreg.d[0];
+
+   C( 1, 0 ) += c_00_c_10_vreg.d[1];  C( 1, 1 ) += c_01_c_11_vreg.d[1];
+   C( 1, 2 ) += c_02_c_12_vreg.d[1];  C( 1, 3 ) += c_03_c_13_vreg.d[1];
+
+   C( 2, 0 ) += c_20_c_30_vreg.d[0];  C( 2, 1 ) += c_21_c_31_vreg.d[0];
+   C( 2, 2 ) += c_22_c_32_vreg.d[0];  C( 2, 3 ) += c_23_c_33_vreg.d[0];
+
+   C( 3, 0 ) += c_20_c_30_vreg.d[1];  C( 3, 1 ) += c_21_c_31_vreg.d[1];
+   C( 3, 2 ) += c_22_c_32_vreg.d[1];  C( 3, 3 ) += c_23_c_33_vreg.d[1];
+
+  // __m256d c1 = _mm256_loadu_pd(&C(0,0));	// load first row of C
+ // 	__m256d c2 = _mm256_loadu_pd(&C(1,0));	// load second row of C
+ // 	__m256d c3 = _mm256_loadu_pd(&C(2,0));	// load third row of C
+ // 	__m256d c4 = _mm256_loadu_pd(&C(3,0));	// load fourth row of C
+  //
+  // for(int i = 0; i < k; i++){
+  //   __m256d a = _mm256_loadu_pd(&A(i,0));		// Load ith row of A; a = <ai0, ai1, ai2, ai3>
+  //   __m256d b1 = _mm256_broadcast_sd(&B(i,0));	// create vector b1 = <B+i+0*n, B+i+0*n, B+i+0*n, B+i+0*n>
+  //   __m256d b2 = _mm256_broadcast_sd(&B(i,1));	// create vector b2 = <B+i+1*n, B+i+1*n, B+i+1*n, B+i+1*n>
+  //   __m256d b3 = _mm256_broadcast_sd(&B(i,2));	// create vector b3 = <B+i+2*n, B+i+2*n, B+i+2*n, B+i+2*n>
+  //   __m256d b4 = _mm256_broadcast_sd(&B(i,3));	// create vector b4 = <B+i+3*n, B+i+3*n, B+i+3*n, B+i+3*n>
+  //
+  //   c1 = _mm256_add_pd(c1, _mm256_mul_pd(a,b1));	// c1 = c1 + a * b1
+  //   c2 = _mm256_add_pd(c2, _mm256_mul_pd(a,b2));	// c2 = c2 + a * b2
+  //   c3 = _mm256_add_pd(c3, _mm256_mul_pd(a,b3));	// c3 = c3 + a * b3
+  //   c4 = _mm256_add_pd(c4, _mm256_mul_pd(a,b4));	// c4 = c4 + a * b4
+  //
+  // }
+  //
+  // _mm256_storeu_pd(&C(0,0), c1);
+  // _mm256_storeu_pd(&C(1,0), c2);
+  // _mm256_storeu_pd(&C(2,0), c3);
+  // _mm256_storeu_pd(&C(3,0), c4);
   // /* So, this routine computes a 4x4 block of matrix A
   //          C( 0, 0 ), C( 0, 1 ), C( 0, 2 ), C( 0, 3 ).
   //          C( 1, 0 ), C( 1, 1 ), C( 1, 2 ), C( 1, 3 ).
@@ -150,6 +202,8 @@ void AddDot( int n, double *x,   double *y, double *gamma ,int len)
 #define mc 128
 #define kc 128
 #define nb 1000//size of packing for B
+
+
 void PackMatrixA(int k, double *A, int lda, double *a_to){
   int j;
 
@@ -190,17 +244,17 @@ void InnerKernel(int m, int n, int k,double*A, int lda,
   double packedB[kc*nb];
   for(j = 0; j < p; j+=4){
     //for each row of C
-    /*if(first_pack){
+    if(first_pack){
       PackMatrixB(k, &B(0,j),ldb,&packedB[j*k]);
-    }*/
+    }
     //for each col of C
     for(i = 0 ; i < q; i+=4){
-      /*if(j == 0){
+      if(j == 0){
         PackMatrixA(k, &A(i,0), lda, &packedA[i*k]);
-      }*/
-      for(int w= 0; w < k;w+=4){
-        Mymulti(4, &A(i,w),4,&B(w,j),4,&C(i,j),ldc);
       }
+      //for(int w= 0; w < k;w+=4){
+        Mymulti(k, &packedA[i*k],4,&packedB[j*k],ldb,&C(i,j),ldc);
+      //}
     }
   }
 
