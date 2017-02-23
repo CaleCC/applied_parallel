@@ -89,22 +89,13 @@ void square_dgemm ( int n, double* A, double* B, double* C )
   int p = n-n%4;
   for(j = 0; j < p; j+=4){
     //for each row of C
-    for(i = 0 ; i < n; i+=4){
-      //printf("debig 1\n");
-      if(i + 4 > n){
-        while(i < n){
-          AddDot(n, &A(i,0),&B(0,j),&C(i,j));
-          che[i][j]++;
-          i++;
-        }
-      }else{
+    for(i = 0 ; i < p; i+=4){
         Mymulti(n, &A(i,0),&B(0,j),&C(i,j));
         for(int u = 0; u < 4;u++){
           for(int v = 0; v < 4; v++){
             che[i+u][j+v]++;
           }
         }
-      }
     }
   }
   for(int u = 0; u < 31;u++){
@@ -114,13 +105,28 @@ void square_dgemm ( int n, double* A, double* B, double* C )
     }
   }
   printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-  for(j = p; j <n;j++){
-    for(i = 0; i < n; i++){
+  for(j = p; j <n; j++){
+    for(i = 0; i < p; i++){
       AddDot(n, &A(i,0),&B(0,j),&C(i,j));
       che[i][j]++;
 
     }
   }
+  printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+  for(int u = 0; u < 31;u++){
+    printf("\n");
+    for(int v = 0; v < 31; v++){
+      printf("%d", che[u][v]);
+    }
+  }
+  for(j = 0; j <n; j++){
+    for(i = p; i < n; i++){
+      AddDot(n, &A(i,0),&B(0,j),&C(i,j));
+      che[i][j]++;
+
+    }
+  }
+
   for(int u = 0; u < 31;u++){
     printf("\n");
     for(int v = 0; v < 31; v++){
