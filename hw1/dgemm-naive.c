@@ -61,6 +61,22 @@ void Mymulti(int n, double *A, double* B,double *C){
       }
 }
 
+
+#define X(i) x[ (i)*n ]
+
+void AddDot( int n, double *x,   double *y, double *gamma )
+{
+  /* compute gamma := x' * y + gamma with vectors x and y of length n.
+     Here x starts at location x with increment (stride) incx and y starts at location y and has (implicit) stride of 1.
+  */
+
+  int p;
+
+  for ( p=0; p<n; p++ ){
+    *gamma += X( p ) * y[ p ];
+  }
+}
+
 void square_dgemm ( int n, double* A, double* B, double* C )
 {
 
@@ -68,13 +84,19 @@ void square_dgemm ( int n, double* A, double* B, double* C )
   int j = 0;
   //for each columns of C
     //printf("debig 1\n");
-  printf("d0");
-  for(j = 0; j < n; j+=4){
+
+  for(j = 0; j+4 < n; j+=4){
     //for each row of C
-    for(i = 0 ; i < n; i+=4){
+    for(i = 0 ; i+4 < n; i+=4){
       //printf("debig 1\n");
-      printf("d0");
       Mymulti(n, &A(i,0),&B(0,j),&C(i,j));
+    }
+  }
+  for(int j1 = j; j1 < n; j1++){
+    //for each row of C
+    for(int i1 = i; i1 < n; i1++){
+      //printf("debig 1\n");
+      AddDot(n, &A(i1,0),&B(0,j1),&C(i1,j1));
     }
   }
 }
