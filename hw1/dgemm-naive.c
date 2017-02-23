@@ -302,7 +302,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
   int lda = n;
   int ldb=n;
   int ldc = n;
-  int p,pb,ib;
+  int p,pb,ib,pp,ii,ppb,iib;
 
   for(p = 0; p<n; p+=kc){
     pb = MIN(n-p, kc);
