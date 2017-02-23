@@ -124,8 +124,8 @@ void AddDot( int n, double *x,   double *y, double *gamma ,int len)
 }
 
 /* Block sizes */
-#define mc 20
-#define kc 20
+#define mc 128
+#define kc 128
 
 
 void InnerKernel(int m, int n, int k,double*A, double*B, double*C,int len){
