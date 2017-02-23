@@ -15,17 +15,17 @@ const char* dgemm_desc = "Naive, three-loop dgemm.";
 
 void Mymulti(int n, double *A,int lda, double* B,int  ldb,
                                        double *C, int ldc){
-   __m256d c1 = _mm256_loadu_pd(C(0,0));	// load first row of C
- 	__m256d c2 = _mm256_loadu_pd(C(1,0));	// load second row of C
- 	__m256d c3 = _mm256_loadu_pd(C(2,0));	// load third row of C
- 	__m256d c4 = _mm256_loadu_pd(C(3,0));	// load fourth row of C
+   __m256d c1 = _mm256_loadu_pd(&C(0,0));	// load first row of C
+ 	__m256d c2 = _mm256_loadu_pd(&C(1,0));	// load second row of C
+ 	__m256d c3 = _mm256_loadu_pd(&C(2,0));	// load third row of C
+ 	__m256d c4 = _mm256_loadu_pd(&C(3,0));	// load fourth row of C
 
-  for(int i = 0, i < 4, i++){
-    __m256d a = _mm256_loadu_pd(A(i,0));		// Load ith row of A; a = <ai0, ai1, ai2, ai3>
-    __m256d b1 = _mm256_broadcast_sd(B(i,0));	// create vector b1 = <B+i+0*n, B+i+0*n, B+i+0*n, B+i+0*n>
-    __m256d b2 = _mm256_broadcast_sd(B(i,1));	// create vector b2 = <B+i+1*n, B+i+1*n, B+i+1*n, B+i+1*n>
-    __m256d b3 = _mm256_broadcast_sd(B(i,2));	// create vector b3 = <B+i+2*n, B+i+2*n, B+i+2*n, B+i+2*n>
-    __m256d b4 = _mm256_broadcast_sd(B(i,3));	// create vector b4 = <B+i+3*n, B+i+3*n, B+i+3*n, B+i+3*n>
+  for(int i = 0; i < 4; i++){
+    __m256d a = _mm256_loadu_pd(&A(i,0));		// Load ith row of A; a = <ai0, ai1, ai2, ai3>
+    __m256d b1 = _mm256_broadcast_sd(&B(i,0));	// create vector b1 = <B+i+0*n, B+i+0*n, B+i+0*n, B+i+0*n>
+    __m256d b2 = _mm256_broadcast_sd(&B(i,1));	// create vector b2 = <B+i+1*n, B+i+1*n, B+i+1*n, B+i+1*n>
+    __m256d b3 = _mm256_broadcast_sd(&B(i,2));	// create vector b3 = <B+i+2*n, B+i+2*n, B+i+2*n, B+i+2*n>
+    __m256d b4 = _mm256_broadcast_sd(&B(i,3));	// create vector b4 = <B+i+3*n, B+i+3*n, B+i+3*n, B+i+3*n>
 
     c1 = _mm256_add_pd(c1, _mm256_mul_pd(a,b1));	// c1 = c1 + a * b1
     c2 = _mm256_add_pd(c2, _mm256_mul_pd(a,b2));	// c2 = c2 + a * b2
@@ -34,10 +34,10 @@ void Mymulti(int n, double *A,int lda, double* B,int  ldb,
 
   }
 
-  _mm256_storeu_pd(C(0,0), c1);
-  _mm256_storeu_pd(C(1,0), c2);
-  _mm256_storeu_pd(C(2,0), c3);
-  _mm256_storeu_pd(C(3,0), c4);
+  _mm256_storeu_pd(&C(0,0), c1);
+  _mm256_storeu_pd(&C(1,0), c2);
+  _mm256_storeu_pd(&C(2,0), c3);
+  _mm256_storeu_pd(&C(3,0), c4);
   // /* So, this routine computes a 4x4 block of matrix A
   //          C( 0, 0 ), C( 0, 1 ), C( 0, 2 ), C( 0, 3 ).
   //          C( 1, 0 ), C( 1, 1 ), C( 1, 2 ), C( 1, 3 ).
