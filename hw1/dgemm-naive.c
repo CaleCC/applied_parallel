@@ -4,7 +4,6 @@ const char* dgemm_desc = "Naive, three-loop dgemm.";
 
 //reference git wiki https://github.com/flame/how-to-optimize-gemm/wiki
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
-#define BLOCK_SIZE 128
 #define A(i,j) A[(j)*len + (i)]
 #define B(i,j) B[(j)*len + (i)]
 #define C(i,j) C[(j)*len + (i)]
@@ -14,11 +13,7 @@ const char* dgemm_desc = "Naive, three-loop dgemm.";
 #include <xmmintrin.h>  // SSE
 #include <pmmintrin.h>  // SSE2
 #include <emmintrin.h>  // SSE3
-typedef union
-{
-  __m128d v;
-  double d[2];
-} v2df_t;
+
 
 void Mymulti(int n, double *A, double* B,double *C, int len){
   /* So, this routine computes a 4x4 block of matrix A
@@ -107,7 +102,7 @@ void Mymulti(int n, double *A, double* B,double *C, int len){
   C( 3, 0 ) += c_30_reg;   C( 3, 1 ) += c_31_reg;   C( 3, 2 ) += c_32_reg;   C( 3, 3 ) += c_33_reg;
 }
 
-
+//the naive way
 #define X(i) x[ (i)*len ]
 
 void AddDot( int n, double *x,   double *y, double *gamma ,int len)
@@ -124,18 +119,33 @@ void AddDot( int n, double *x,   double *y, double *gamma ,int len)
 }
 
 /* Block sizes */
-#define mc 160
-#define kc 160
+#define mc 128
+#define kc 128
 
 
 void InnerKernel(int m, int n, int k,double*A, double*B, double*C,int len){
   int i,j;
   int p = n-n%4;
   int q = m-m%4;
+  double packedA[m*k];
   for(j = 0; j < p; j+=4){
     //for each row of C
     for(i = 0 ; i < q; i+=4){
-      Mymulti(k, &A(i,0),&B(0,j),&C(i,j),n);
+      PackMatrixA(k, &A(i,0), len, &packedA[i*k]);
+      Mymulti(k, &packedA[i*k],&B(0,j),&C(i,j),n);
+    }
+  }
+
+  void PackMatrixA(int k, double *a, int lda, double *a_to){
+    int j;
+
+    for(j = 0; j < k; j++){
+      double *a_ij_pntr = &A(0,j);
+      *a_to++ = *a_ij_pntr;
+      *a_to++ = *(a_ij_pntr+1);
+      *a_to++ = *(a_ij_pntr+2);
+      *a_to++ = *(a_ij_pntr+3);
+
     }
   }
 
