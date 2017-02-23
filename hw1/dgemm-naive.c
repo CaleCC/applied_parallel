@@ -112,13 +112,14 @@ void square_dgemm ( int n, double* A, double* B, double* C )
 
     }
   }
-  printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+
   for(int u = 0; u < 31;u++){
     printf("\n");
     for(int v = 0; v < 31; v++){
       printf("%d", che[u][v]);
     }
   }
+printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
   for(j = 0; j <n; j++){
     for(i = p; i < n; i++){
       AddDot(n, &A(i,0),&B(0,j),&C(i,j));
