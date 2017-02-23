@@ -122,7 +122,7 @@ void AddDot( int n, double *x,   double *y, double *gamma ,int len)
 /* Block sizes */
 #define mc 128
 #define kc 128
-
+#define nb 1000//size of packing for B
 void PackMatrixA(int k, double *A, int lda, double *a_to){
   int j;
 
@@ -136,20 +136,40 @@ void PackMatrixA(int k, double *A, int lda, double *a_to){
   }
 }
 
+void PackMatrixB(int k, double *b,int ldb, double *b_to){
+  int i;
+  double
+  *b_i0_pntr = &B( 0, 0 ), *b_i1_pntr = &B( 0, 1 ),
+  *b_i2_pntr = &B( 0, 2 ), *b_i3_pntr = &B( 0, 3 );
+
+  for(i = 0; i < k; i++){
+    *b_to++ = *b_i0_pntr++;
+    *b_to++ = *b_i1_pntr++;
+    *b_to++ = *b_i2_pntr++;
+    *b_to++ = *b_i3_pntr++;
+  }
+}
+
 
 
 
 void InnerKernel(int m, int n, int k,double*A, int lda,
                                      double*B, int ldb,
-                                     double*C, int ldc){
+                                     double*C, int ldc,int first_pack){
   int i,j;
   int p = n-n%4;
   int q = m-m%4;
   double packedA[q*k];
+  double packedB[kc*nb];
   for(j = 0; j < p; j+=4){
     //for each row of C
+    if(first_pack){
+      PackMatrixB(k, &B(0,j),ldb,&packedB[j*k]);
+    }
     for(i = 0 ; i < q; i+=4){
-      PackMatrixA(k, &A(i,0), lda, &packedA[i*k]);
+      if(j == 0){
+        PackMatrixA(k, &A(i,0), lda, &packedA[i*k]);
+      }
       Mymulti(k, &packedA[i*k],4,&B(0,j),ldb,&C(i,j),ldc);
     }
   }
@@ -184,7 +204,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
     pb = MIN(n-p, kc);
     for(i = 0; i<n; i+=mc){
       ib = MIN(n - i, mc);
-      InnerKernel(ib, n, pb, &A(i,p),n, &B(p,0),n,&C(i,0),n);
+      InnerKernel(ib, n, pb, &A(i,p),n, &B(p,0),n,&C(i,0),n,i==0);
     }
   }
   //for each columns of C
