@@ -199,10 +199,19 @@ void AddDot( int n, double *x,   double *y, double *gamma ,int len)
   */
 
   int p;
+  register double
+  a_0p,
+  c_00;
+  double * b_p0_pntr;
+  b_p0_pntr = y[0];
+  c_00_reg = *gamma;
+
 
   for ( p=0; p<n; p++ ){
-    *gamma += X( p ) * y[ p ];
+    a_0p = X(p);
+    c_00_reg += a_0p * * b_p0_pntr++;
   }
+  *gamma = c_00_reg;
 }
 
 /* Block sizes */
