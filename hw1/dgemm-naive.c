@@ -83,7 +83,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
 
   int i = 0;
   int j = 0;
-  int che[31][31];
+  int che[31][31]={0};
   //for each columns of C
     //printf("debig 1\n");
   int p = n-n%4;
@@ -117,7 +117,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
   for(int u = 0; u < 31;u++){
     printf("\n");
     for(int v = 0; v < 31; v++){
-      printf("%d", che[u][v]);
+      printf("%d", &che[u][v]);
     }
   }
 
