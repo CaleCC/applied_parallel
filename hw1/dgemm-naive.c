@@ -209,7 +209,7 @@ void AddDot( int n, double *x,   double *y, double *gamma ,int len)
 
   for ( p=0; p<n; p++ ){
     a_0p_reg = X(p);
-    c_00_reg += a_0p * * b_p0_pntr++;
+    c_00_reg += a_0p_reg * * b_p0_pntr++;
   }
   *gamma = c_00_reg;
 }
