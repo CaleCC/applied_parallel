@@ -4,9 +4,9 @@ const char* dgemm_desc = "Naive, three-loop dgemm.";
 
 //reference git wiki https://github.com/flame/how-to-optimize-gemm/wiki
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
-#define A(i,j) A[(j)*len + (i)]
-#define B(i,j) B[(j)*len + (i)]
-#define C(i,j) C[(j)*len + (i)]
+#define A(i,j) A[(j)*lda + (i)]
+#define B(i,j) B[(j)*ldb + (i)]
+#define C(i,j) C[(j)*lec + (i)]
 //void Mymulti(int, double*,  double*, double *)
 
 #include <mmintrin.h>
@@ -15,7 +15,8 @@ const char* dgemm_desc = "Naive, three-loop dgemm.";
 #include <emmintrin.h>  // SSE3
 
 
-void Mymulti(int n, double *A, double* B,double *C, int len){
+void Mymulti(int n, double *A,int lda, double* B,int  ldb
+                                       double *C, int ldc){
   /* So, this routine computes a 4x4 block of matrix A
            C( 0, 0 ), C( 0, 1 ), C( 0, 2 ), C( 0, 3 ).
            C( 1, 0 ), C( 1, 1 ), C( 1, 2 ), C( 1, 3 ).
@@ -122,7 +123,7 @@ void AddDot( int n, double *x,   double *y, double *gamma ,int len)
 #define mc 128
 #define kc 128
 
-void PackMatrixA(int k, double *A, int len, double *a_to){
+void PackMatrixA(int k, double *A, int lda, double *a_to){
   int j;
 
   for(j = 0; j < k; j++){
@@ -138,7 +139,9 @@ void PackMatrixA(int k, double *A, int len, double *a_to){
 
 
 
-void InnerKernel(int m, int n, int k,double*A, double*B, double*C,int len){
+void InnerKernel(int m, int n, int k,double*A, int lda,
+                                     double*B, int ldb,
+                                     double*C, int ldc){
   int i,j;
   int p = n-n%4;
   int q = m-m%4;
@@ -146,8 +149,8 @@ void InnerKernel(int m, int n, int k,double*A, double*B, double*C,int len){
   for(j = 0; j < p; j+=4){
     //for each row of C
     for(i = 0 ; i < q; i+=4){
-      PackMatrixA(k, &A(i,0), len, &packedA[i*k]);
-      Mymulti(k, &packedA[i*k],&B(0,j),&C(i,j),n);
+      PackMatrixA(k, &A(i,0), lda, &packedA[i*k]);
+      Mymulti(k, &packedA[i*k],4,&B(0,j),ldb,&C(i,j),ldc);
     }
   }
 
@@ -172,14 +175,16 @@ void square_dgemm ( int n, double* A, double* B, double* C )
 
   int i = 0;
   int j = 0;
-  int len = n;
+  int lda = n;
+  int ldb=n;
+  int ldc = n;
   int p,pb,ib;
 
   for(p = 0; p<n; p+=kc){
     pb = MIN(n-p, kc);
     for(i = 0; i<n; i+=mc){
       ib = MIN(n - i, mc);
-      InnerKernel(ib, n, pb, &A(i,p), &B(p,0),&C(i,0),n);
+      InnerKernel(ib, n, pb, &A(i,p),n, &B(p,0),n,&C(i,0),n);
     }
   }
   //for each columns of C
