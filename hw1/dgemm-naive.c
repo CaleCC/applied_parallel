@@ -123,33 +123,54 @@ void AddDot( int n, double *x,   double *y, double *gamma )
   }
 }
 
-void square_dgemm ( int n, double* A, double* B, double* C )
-{
+/* Block sizes */
+#define mc 256
+#define kc 128
 
-  int i = 0;
-  int j = 0;
-  //for each columns of C
-    //printf("debig 1\n");
+
+void InnerKernel(int m, int n, int k,double*A, double*B, double*C){
+  int i,j;
   int p = n-n%4;
+  int q = m-m%4;
   for(j = 0; j < p; j+=4){
     //for each row of C
-    for(i = 0 ; i < p; i+=4){
+    for(i = 0 ; i < q; i+=4){
       Mymulti(n, &A(i,0),&B(0,j),&C(i,j));
     }
   }
 
 
-  for(j = p; j <n; j++){
-    for(i = 0; i < p; i++){
+  for(j = p; j <m; j++){
+    for(i = 0; i < q; i++){
       AddDot(n, &A(i,0),&B(0,j),&C(i,j));
     }
   }
 
 
-  for(j = 0; j <n; j++){
+  for(j = 0; j <m; j++){
     for(i = p; i < n; i++){
       AddDot(n, &A(i,0),&B(0,j),&C(i,j));
     }
   }
+}
+
+void square_dgemm ( int n, double* A, double* B, double* C )
+{
+
+  int i = 0;
+  int j = 0;
+
+  int p,pb,ib;
+
+  for(p = 0; p<k; p+=kc){
+    pb = min(k-p, kc);
+    for(i = 0; i<m; i+=mc){
+      ib = min(m - i, mc);
+      InnerKernel(ib, n, pb, &A(i,p), &B(p,0),&C(i,0));
+    }
+  }
+  //for each columns of C
+    //printf("debig 1\n");
+
 
 }
