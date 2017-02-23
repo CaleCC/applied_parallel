@@ -122,7 +122,7 @@ void AddDot( int n, double *x,   double *y, double *gamma ,int len)
 #define mc 128
 #define kc 128
 
-void PackMatrixA(int k, double *a, int lda, double *a_to){
+void PackMatrixA(int k, double *a, int len, double *a_to){
   int j;
 
   for(j = 0; j < k; j++){
