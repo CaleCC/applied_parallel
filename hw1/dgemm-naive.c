@@ -71,18 +71,19 @@ void Mymulti(int n, double *A, double* B,double *C){
     b_p1_vreg.v = _mm_loaddup_pd( (double *) b_p1_pntr++ );   /* load and duplicate */
     b_p2_vreg.v = _mm_loaddup_pd( (double *) b_p2_pntr++ );   /* load and duplicate */
     b_p3_vreg.v = _mm_loaddup_pd( (double *) b_p3_pntr++ );   /* load and duplicate */
-printf("ddd10\n");
+    printf("ddd10\n");
     /* First row and second rows */
     c_00_c_10_vreg.v += a_0p_a_1p_vreg.v * b_p0_vreg.v;
     c_01_c_11_vreg.v += a_0p_a_1p_vreg.v * b_p1_vreg.v;
     c_02_c_12_vreg.v += a_0p_a_1p_vreg.v * b_p2_vreg.v;
     c_03_c_13_vreg.v += a_0p_a_1p_vreg.v * b_p3_vreg.v;
-printf("ddd11\n");
+    printf("ddd11\n");
     /* Third and fourth rows */
     c_20_c_30_vreg.v += a_2p_a_3p_vreg.v * b_p0_vreg.v;
     c_21_c_31_vreg.v += a_2p_a_3p_vreg.v * b_p1_vreg.v;
     c_22_c_32_vreg.v += a_2p_a_3p_vreg.v * b_p2_vreg.v;
     c_23_c_33_vreg.v += a_2p_a_3p_vreg.v * b_p3_vreg.v;
+    printf("ddd12\n");
   }
  printf("ddd6\n");
   C( 0, 0 ) += c_00_c_10_vreg.d[0];  C( 0, 1 ) += c_01_c_11_vreg.d[0];
