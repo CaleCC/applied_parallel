@@ -38,14 +38,14 @@ void Mymulti(int n, double *A, double* B,double *C){
       of B as well */
 
       int p;
-
+      printf("d1");
    v2df_t
      c_00_c_10_vreg,    c_01_c_11_vreg,    c_02_c_12_vreg,    c_03_c_13_vreg,
      c_20_c_30_vreg,    c_21_c_31_vreg,    c_22_c_32_vreg,    c_23_c_33_vreg,
      a_0p_a_1p_vreg,
      a_2p_a_3p_vreg,
      b_p0_vreg, b_p1_vreg, b_p2_vreg, b_p3_vreg;
-
+    printf("d2");
    double
      /* Point to the current elements in the four columns of B */
      *b_p0_pntr, *b_p1_pntr, *b_p2_pntr, *b_p3_pntr;
@@ -63,7 +63,7 @@ void Mymulti(int n, double *A, double* B,double *C){
    c_21_c_31_vreg.v = _mm_setzero_pd();
    c_22_c_32_vreg.v = _mm_setzero_pd();
    c_23_c_33_vreg.v = _mm_setzero_pd();
-
+   printf("d3");
    for ( p=0; p<n; p++ ){
      a_0p_a_1p_vreg.v = _mm_load_pd( (double *) &A( 0, p ) );
      a_2p_a_3p_vreg.v = _mm_load_pd( (double *) &A( 2, p ) );
@@ -110,6 +110,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
     //for each row of C
     for(i = 0 ; i < n; i+=4){
       //printf("debig 1\n");
+      printf("d0");
       Mymulti(n, &A(i,0),&B(0,j),&C(i,j));
     }
   }
