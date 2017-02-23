@@ -216,7 +216,7 @@ void AddDot( int n, double *x,   double *y, double *gamma ,int len)
 
 /* Block sizes */
 #define mc 128
-#define kc 128
+#define kc 128/L1 block size
 #define nb 1000//size of packing for B
 
 
@@ -290,6 +290,9 @@ void InnerKernel(int m, int n, int k,double*A, int lda,
   }
 }
 
+
+
+
 void square_dgemm ( int n, double* A, double* B, double* C )
 {
 
@@ -304,7 +307,13 @@ void square_dgemm ( int n, double* A, double* B, double* C )
     pb = MIN(n-p, kc);
     for(i = 0; i<n; i+=mc){
       ib = MIN(n - i, mc);
-      InnerKernel(ib, n, pb, &A(i,p),n, &B(p,0),n,&C(i,0),n,i==0);
+        for(pp = 0; pp < pb ; p+=16)
+          for(ii = 0; ii < ib; ib+=16){
+              ppb = MIN(pb-pp, 16);
+              iib = MIN(ib-ii, 16);
+              InnerKernel(ppb,n,iib,&A(i+ii,pp+p),n,&B(pp+p,0),n,&C(ii+i,0),n,i==1);
+          }
+      //InnerKernel(ib, n, pb, &A(i,p),n, &B(p,0),n,&C(i,0),n,i==0);
     }
   }
   //for each columns of C
