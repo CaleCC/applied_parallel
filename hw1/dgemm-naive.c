@@ -63,7 +63,7 @@ void Mymulti(int n, double *A, double* B,double *C){
   c_22_c_32_vreg.v = _mm_setzero_pd();
   c_23_c_33_vreg.v = _mm_setzero_pd();
  printf("ddd5\n");
-  for ( p=0; p<k; p++ ){
+  for ( p=0; p<n; p++ ){
     a_0p_a_1p_vreg.v = _mm_load_pd( (double *) &A( 0, p ) );
     a_2p_a_3p_vreg.v = _mm_load_pd( (double *) &A( 2, p ) );
 
