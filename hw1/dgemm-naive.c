@@ -34,6 +34,7 @@ void Mymulti(int n, double *A, double* B,double *C){
 
       int p;
 
+
       for ( p=0; p<n; p++ ){
         /* First row */
         C( 0, 0 ) += A( 0, p ) * B( p, 0 );
@@ -82,6 +83,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
 
   int i = 0;
   int j = 0;
+  che[31][31];
   //for each columns of C
     //printf("debig 1\n");
   int p = n-n%4;
@@ -92,17 +94,32 @@ void square_dgemm ( int n, double* A, double* B, double* C )
       if(i + 4 > n){
         while(i < n){
           AddDot(n, &A(i,0),&B(0,j),&C(i,j));
+          che[31][31]++;
           i++;
         }
       }else{
         Mymulti(n, &A(i,0),&B(0,j),&C(i,j));
+        for(int u = 0; u < 4;u++){
+          for(int v = 0; v < 4; v++){
+            ch[i+u][j+v]++;
+          }
+        }
       }
     }
   }
   for(j = p; j <n;j++){
     for(i = 0; i < n; i++){
       AddDot(n, &A(i,0),&B(0,j),&C(i,j));
+      che[31][31++];
+
     }
   }
+  for(int u = 0; u < 31;u++){
+    printf("\n");
+    for(int v = 0; v < 31; v++){
+      printf("%d", che);
+    }
+  }
+
 
 }
