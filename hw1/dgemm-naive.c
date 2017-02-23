@@ -159,7 +159,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
 
   int i = 0;
   int j = 0;
-
+  int len = n;
   int p,pb,ib;
 
   for(p = 0; p<n; p+=kc){
