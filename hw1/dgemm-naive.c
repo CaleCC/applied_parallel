@@ -16,6 +16,13 @@ const char* dgemm_desc = "Naive, three-loop dgemm.";
 #include <xmmintrin.h>  // SSE
 #include <pmmintrin.h>  // SSE2
 
+typedef union
+{
+  __m128d v;
+  double d[2];
+} v2df_t;
+
+
 void Mymulti(int k, double *A,int lda, double* B,int  ldb,
                                        double *C, int ldc){
 
@@ -37,16 +44,16 @@ void Mymulti(int k, double *A,int lda, double* B,int  ldb,
    c_23_c_33_vreg.v = _mm_setzero_pd();
 
    for ( p=0; p<k; p++ ){
-     a_0p_a_1p_vreg.v = _mm_load_pd( (double *) a );
-     a_2p_a_3p_vreg.v = _mm_load_pd( (double *) ( a+2 ) );
-     a += 4;
+     a_0p_a_1p_vreg.v = _mm_load_pd( (double *) A );
+     a_2p_a_3p_vreg.v = _mm_load_pd( (double *) ( A+2 ) );
+     A += 4;
 
-     b_p0_vreg.v = _mm_loaddup_pd( (double *) b );       /* load and duplicate */
-     b_p1_vreg.v = _mm_loaddup_pd( (double *) (b+1) );   /* load and duplicate */
-     b_p2_vreg.v = _mm_loaddup_pd( (double *) (b+2) );   /* load and duplicate */
-     b_p3_vreg.v = _mm_loaddup_pd( (double *) (b+3) );   /* load and duplicate */
+     b_p0_vreg.v = _mm_loaddup_pd( (double *) B );       /* load and duplicate */
+     b_p1_vreg.v = _mm_loaddup_pd( (double *) (B+1) );   /* load and duplicate */
+     b_p2_vreg.v = _mm_loaddup_pd( (double *) (B+2) );   /* load and duplicate */
+     b_p3_vreg.v = _mm_loaddup_pd( (double *) (B+3) );   /* load and duplicate */
 
-     b += 4;
+     B += 4;
 
      /* First row and second rows */
      c_00_c_10_vreg.v += a_0p_a_1p_vreg.v * b_p0_vreg.v;
