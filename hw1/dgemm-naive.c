@@ -6,7 +6,7 @@ const char* dgemm_desc = "Naive, three-loop dgemm.";
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define A(i,j) A[(j)*lda + (i)]
 #define B(i,j) B[(j)*ldb + (i)]
-#define C(i,j) C[(j)*lec + (i)]
+#define C(i,j) C[(j)*ldc + (i)]
 //void Mymulti(int, double*,  double*, double *)
 
 #include <mmintrin.h>
@@ -15,7 +15,7 @@ const char* dgemm_desc = "Naive, three-loop dgemm.";
 #include <emmintrin.h>  // SSE3
 
 
-void Mymulti(int n, double *A,int lda, double* B,int  ldb
+void Mymulti(int n, double *A,int lda, double* B,int  ldb,
                                        double *C, int ldc){
   /* So, this routine computes a 4x4 block of matrix A
            C( 0, 0 ), C( 0, 1 ), C( 0, 2 ), C( 0, 3 ).
