@@ -5,9 +5,9 @@ const char* dgemm_desc = "Naive, three-loop dgemm.";
 //reference git wiki https://github.com/flame/how-to-optimize-gemm/wiki
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define BLOCK_SIZE 128
-#define A(i,j) A[(j)*n + (i)]
-#define B(i,j) B[(j)*n + (i)]
-#define C(i,j) C[(j)*n + (i)]
+#define A(i,j) A[(j)*len + (i)]
+#define B(i,j) B[(j)*len + (i)]
+#define C(i,j) C[(j)*len + (i)]
 //void Mymulti(int, double*,  double*, double *)
 
 #include <mmintrin.h>
@@ -20,7 +20,7 @@ typedef union
   double d[2];
 } v2df_t;
 
-void Mymulti(int n, double *A, double* B,double *C){
+void Mymulti(int n, double *A, double* B,double *C, int len){
   /* So, this routine computes a 4x4 block of matrix A
            C( 0, 0 ), C( 0, 1 ), C( 0, 2 ), C( 0, 3 ).
            C( 1, 0 ), C( 1, 1 ), C( 1, 2 ), C( 1, 3 ).
@@ -108,9 +108,9 @@ void Mymulti(int n, double *A, double* B,double *C){
 }
 
 
-#define X(i) x[ (i)*n ]
+#define X(i) x[ (i)*len ]
 
-void AddDot( int n, double *x,   double *y, double *gamma )
+void AddDot( int n, double *x,   double *y, double *gamma ,int len)
 {
   /* compute gamma := x' * y + gamma with vectors x and y of length n.
      Here x starts at location x with increment (stride) incx and y starts at location y and has (implicit) stride of 1.
@@ -124,32 +124,32 @@ void AddDot( int n, double *x,   double *y, double *gamma )
 }
 
 /* Block sizes */
-#define mc 256
+#define mc 128
 #define kc 128
 
 
-void InnerKernel(int m, int n, int k,double*A, double*B, double*C){
+void InnerKernel(int m, int n, int k,double*A, double*B, double*C,int len){
   int i,j;
   int p = n-n%4;
   int q = m-m%4;
   for(j = 0; j < p; j+=4){
     //for each row of C
     for(i = 0 ; i < q; i+=4){
-      Mymulti(n, &A(i,0),&B(0,j),&C(i,j));
+      Mymulti(k, &A(i,0),&B(0,j),&C(i,j),n);
     }
   }
 
 
   for(j = p; j <m; j++){
     for(i = 0; i < q; i++){
-      AddDot(n, &A(i,0),&B(0,j),&C(i,j));
+      AddDot(k, &A(i,0),&B(0,j),&C(i,j),n);
     }
   }
 
 
   for(j = 0; j <m; j++){
     for(i = p; i < n; i++){
-      AddDot(n, &A(i,0),&B(0,j),&C(i,j));
+      AddDot(k, &A(i,0),&B(0,j),&C(i,j),n);
     }
   }
 }
@@ -166,7 +166,7 @@ void square_dgemm ( int n, double* A, double* B, double* C )
     pb = MIN(n-p, kc);
     for(i = 0; i<n; i+=mc){
       ib = MIN(n - i, mc);
-      InnerKernel(ib, n, pb, &A(i,p), &B(p,0),&C(i,0));
+      InnerKernel(ib, n, pb, &A(i,p), &B(p,0),&C(i,0),n);
     }
   }
   //for each columns of C
