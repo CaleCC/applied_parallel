@@ -13,13 +13,14 @@ LDLIBS = -lrt -Wl,--start-group $(MKLROOT)/lib/intel64/libmkl_intel_lp64.a $(MKL
 
 */
 
-
+//followed tutorial from  wiki https://github.com/flame/how-to-optimize-gemm/wiki
+//AVX function https://software.intel.com/sites/landingpage/IntrinsicsGuide/#techs=SSSE3&expand=0
 
 #include<stdlib.h>
 #include<stdio.h>
 const char* dgemm_desc = "Naive, three-loop dgemm.";
 
-//reference git wiki https://github.com/flame/how-to-optimize-gemm/wiki
+
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define A(i,j) A[(j)*lda + (i)]
 #define B(i,j) B[(j)*ldb + (i)]
@@ -30,8 +31,8 @@ const char* dgemm_desc = "Naive, three-loop dgemm.";
 #include <immintrin.h>
 
 #include <mmintrin.h>
-#include <xmmintrin.h>  // SSE
-#include <pmmintrin.h>  // SSE2
+#include <xmmintrin.h>
+#include <pmmintrin.h>
 
 typedef union
 {
@@ -134,7 +135,7 @@ void AddDot( int n, double *a,   double *b, double *c ,int len)
 /* Block sizes */
 #define mc 128
 #define kc 128
-#define nb 2048//size of packing for B
+#define nb 1024//size of packing for B
 
 
 void PackMatrixA(int k, double *A, int lda, double *a_to){
