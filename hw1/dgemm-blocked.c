@@ -112,12 +112,12 @@ void Mymulti(int k, double *A,int lda, double* B,int  ldb,
 
      B += 4;
      /*first row and second rows*/
-     c_00_10_20_30_vreg.vector2 += a_0p_1p_2p_3p_vreg.vector2 * b_p0_p1_vreg.vector2
-     c_01_11_21_31_vreg.vector2 += a_0p_1p_2p_3p_vreg.vector2 * b_p2_p3_vreg.vector2
+     c_00_10_20_30_vreg.vector2 += a_0p_1p_2p_3p_vreg.vector2 * b_p0_p1_vreg.vector2;
+     c_01_11_21_31_vreg.vector2 += a_0p_1p_2p_3p_vreg.vector2 * b_p2_p3_vreg.vector2;
 
      /*third and forth rows*/
-     c_02_12_22_32_vreg.vector2 += a_0p_1p_2p_3p_vreg.vector2 * b_p0_p1_vreg.vector2
-     c_03_13_23_33_vreg.vector2 += a_0p_1p_2p_3p_vreg.vector2 * b_p2_p3_vreg.vector2
+     c_02_12_22_32_vreg.vector2 += a_0p_1p_2p_3p_vreg.vector2 * b_p0_p1_vreg.vector2;
+     c_03_13_23_33_vreg.vector2 += a_0p_1p_2p_3p_vreg.vector2 * b_p2_p3_vreg.vector2;
 
 
 
@@ -151,10 +151,10 @@ void Mymulti(int k, double *A,int lda, double* B,int  ldb,
    C( 0, 0 ) += c_00_10_20_30_vreg.data2[0]; C( 0, 1) += c_01_11_21_31_vreg.data2[0];
    C( 0, 2 ) += c_02_12_22_32_vreg.data2[0]; C( 0, 3) += c_03_13_23_33_vreg.data2[0];
 
-   C( 1, 0 ) += c_00_10_01_11_vreg.data2[1]; C( 1, 1) += c_01_11_21_31_vreg.data2[1];
+   C( 1, 0 ) += c_00_10_20_30_vreg.data2[1]; C( 1, 1) += c_01_11_21_31_vreg.data2[1];
    C( 1, 2 ) += c_02_12_22_32_vreg.data2[1]; C( 1, 3) += c_03_13_23_33_vreg.data2[1];
 
-   C( 2, 0 ) += c_00_10_01_11_vreg.data2[2]; C( 2, 1) += c_01_11_21_31_vreg.data2[2];
+   C( 2, 0 ) += c_00_10_20_30_vreg.data2[2]; C( 2, 1) += c_01_11_21_31_vreg.data2[2];
    C( 2, 2 ) += c_02_12_22_32_vreg.data2[2]; C( 2, 3) += c_03_13_23_33_vreg.data2[2];
 
    C( 3, 0 ) += c_00_10_20_30_vreg.data2[3]; C( 3, 1) += c_01_11_21_31_vreg.data2[3];
