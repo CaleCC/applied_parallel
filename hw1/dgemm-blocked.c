@@ -59,9 +59,13 @@ void Mymulti(int k, double *A,int lda, double* B,int  ldb,
      c_02_12_22_32_vreg,
      c_03_13_23_33_vreg,
      c_01_11_21_31_vreg,
+
      a_0p_1p_2p_3p_vreg,
-     b_p0_p1_vreg,
-     b_p2_p3_vreg;
+
+     b_p0_vreg,
+     b_p1_vreg,
+     b_p3_vreg,
+     b_p3_vreg;
 
 
   //  c_00_c_10_vreg.vector = _mm_setzero_pd();
@@ -103,21 +107,21 @@ void Mymulti(int k, double *A,int lda, double* B,int  ldb,
     //  b_p2_vreg.vector = _mm_loaddup_pd( (double *) (B+2) );   /* load and duplicate */
     //  b_p3_vreg.vector = _mm_loaddup_pd( (double *) (B+3) );   /* load and duplicate */
 
-    //  b_p0_vreg.vector = _mm256_broadcast_sd( (double *) B );	   /* load and duplicate */
-    //  b_p1_vreg.vector = _mm256_broadcast_sd( (double *) (B+1) );   /* load and duplicate */
-    //  b_p2_vreg.vector = _mm256_broadcast_sd( (double *) (B+2) );   /* load and duplicate */
-    //  b_p3_vreg.vector = _mm256_broadcast_sd( (double *) (B+3) );   /* load and duplicate */
-    b_p0_p1_vreg.vector2 = _mm256_broadcast_sd((double *) B);
-    b_p2_p3_vreg.vector2 = _mm256_broadcast_sd((double *) (B+2));
+     b_p0_vreg.vector2 = _mm256_broadcast_sd( (double *) B );	   /* load and duplicate */
+     b_p1_vreg.vector2 = _mm256_broadcast_sd( (double *) (B+1) );   /* load and duplicate */
+     b_p2_vreg.vector2 = _mm256_broadcast_sd( (double *) (B+2) );   /* load and duplicate */
+     b_p3_vreg.vector2 = _mm256_broadcast_sd( (double *) (B+3) );   /* load and duplicate */
+    // b_p0_p1_vreg.vector2 = _mm256_broadcast_sd((double *) B);
+    // b_p2_p3_vreg.vector2 = _mm256_broadcast_sd((double *) (B+2));
 
      B += 4;
      /*first row and second rows*/
-     c_00_10_20_30_vreg.vector2 += a_0p_1p_2p_3p_vreg.vector2 * b_p0_p1_vreg.vector2;
-     c_01_11_21_31_vreg.vector2 += a_0p_1p_2p_3p_vreg.vector2 * b_p2_p3_vreg.vector2;
+     c_00_10_20_30_vreg.vector2 += a_0p_1p_2p_3p_vreg.vector2 * b_p0_vreg.vector2;
+     c_01_11_21_31_vreg.vector2 += a_0p_1p_2p_3p_vreg.vector2 * b_p1_vreg.vector2;
 
      /*third and forth rows*/
-     c_02_12_22_32_vreg.vector2 += a_0p_1p_2p_3p_vreg.vector2 * b_p0_p1_vreg.vector2;
-     c_03_13_23_33_vreg.vector2 += a_0p_1p_2p_3p_vreg.vector2 * b_p2_p3_vreg.vector2;
+     c_02_12_22_32_vreg.vector2 += a_0p_1p_2p_3p_vreg.vector2 * b_p2_vreg.vector2;
+     c_03_13_23_33_vreg.vector2 += a_0p_1p_2p_3p_vreg.vector2 * b_p3_vreg.vector2;
 
 
 
