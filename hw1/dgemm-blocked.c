@@ -184,7 +184,7 @@ void AddDot( int n, double *a,   double *b, double *c ,int len)
 /* Block sizes */
 #define mc 128
 #define kc 128
-#define nb 1024//size of packing for B
+#define nb 2048//size of packing for B
 
 
 void PackMatrixA(int k, double *A, int lda, double *a_to){
