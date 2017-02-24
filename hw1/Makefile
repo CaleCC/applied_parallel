@@ -8,8 +8,8 @@ CFLAGS = -Wall -std=gnu99  -g -msse3 -fast -mavx -unroll-aggressive -opt-prefetc
 #LDLIBS = -lrt -Wl,--start-group $(MKLROOT)/lib/intel64/libmkl_intel_lp64.a $(MKLROOT)/lib/intel64/libmkl_sequential.a $(MKLROOT)/lib/intel64/libmkl_core.a -Wl,--end-group -lpthread -lm
 LDLIBS = -lrt  -I$(MKLROOT)/include -Wl,-L$(MKLROOT)/lib/intel64/ -lmkl_intel_lp64 -lmkl_core -lgomp -lmkl_gnu_thread -lpthread -lm -ldl
 
-targets = benchmark-naive
-objects = benchmark.o dgemm-naive.o
+targets = benchmark-blocked
+objects = benchmark.o dgemm-blocked.o
 
 .PHONY : default
 default : all
@@ -17,12 +17,12 @@ default : all
 .PHONY : all
 all : clean $(targets)
 
-benchmark-naive : benchmark.o dgemm-naive.o
+benchmark-blocked : benchmark.o dgemm-blocked.o
 	$(CC) -o $@ $^ $(LDLIBS)
 
 benchmark.o : benchmark.c
 	$(CC) -c $(CFLAGS) $<
-dgemm-naive.o : dgemm-blocked.c
+dgemm-blocked.o : dgemm-blocked.c
 	$(CC) -c $(CFLAGS) $<
 
 .PHONY : clean
