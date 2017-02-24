@@ -64,7 +64,7 @@ void Mymulti(int k, double *A,int lda, double* B,int  ldb,
 
      b_p0_vreg,
      b_p1_vreg,
-     b_p3_vreg,
+     b_p2_vreg,
      b_p3_vreg;
 
 
