@@ -16,7 +16,7 @@ using namespace std;
 //
 //create bins with length of cutoff
 //
-void create_bins(vector<vector<particle_t> > &bins, particle_t* particles, int n, int & num_bin_row){
+void create_bins(vector<vector<particle_t*> > &bins, particle_t* particles, int n, int & num_bin_row){
   //according to the common.cpp
   //calculate the size
   double size = sqrt(density * n);
@@ -61,7 +61,7 @@ int main( int argc, char **argv )
     set_size( n );
     init_particles( n, particles );
     //create the bins to contain the particles
-    vector<vector<particle_t> > bins;
+    vector<vector<particle_t*> > bins;
     int num_bin_row = 0;
     create_bins(bins, particles, n, num_bin_row);
     int num_bins = num_bin_row * num_bin_row;
@@ -86,7 +86,7 @@ int main( int argc, char **argv )
        for(int j = 0; j < n;j++){
          int x = floor(particles[j].x/cutoff);
          int y = floor(particles[j].y/cutoff);
-         bins[x + num_bin_row * y].push_back(particles[j]);
+         bins[x + num_bin_row * y].push_back(&particles[j]);
        }
         //
         //  compute forces
@@ -127,6 +127,7 @@ int main( int argc, char **argv )
                   }
                 }
               }
+        }
         //
         //  move particles
         //
