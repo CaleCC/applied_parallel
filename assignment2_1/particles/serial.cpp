@@ -132,6 +132,7 @@ int main( int argc, char **argv )
                   for(int c = 0; c < bins[location].size(); c++){
                     cout<<"de69"<<endl;
                     apply_force(particles[i], *bins[bin_num][c], &dmin, &davg, &navg);
+                    cout<<"de70"<<endl;
                   }
                 }
               }
