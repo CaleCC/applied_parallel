@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <math.h>
 #include "common.h"
+using std::vector;
 //
 //  tuned constants copyed from common.cpp
 //
@@ -14,7 +15,7 @@
 //
 //create bins with length of cutoff
 //
-void create_bins(vector<vector<particle_t>>& bins, particle_t* particles, int n, int &num_bin_row){
+void create_bins(vector<vector<particle_t>>& bins, particle_t* particles, int n, int & num_bin_row){
   //according to the common.cpp
   //calculate the size
   double size = sqrt(density * n);
