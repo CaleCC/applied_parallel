@@ -112,22 +112,23 @@ int main( int argc, char **argv )
               x_range.push_back(0);
               y_range.push_back(0);
               if(location >= num_bin_row){
-                x_range.push_back(-1);
-              }
-              if(location < num_bin_row*(num_bin_row-1) ){
-                x_range.push_back(1);
-              }
-              if(location % num_bin_row != 0){
                 y_range.push_back(-1);
               }
-              if(location < num_bin_row*(num_bin_row - 1)){
+              if(location < num_bin_row*(num_bin_row-1) ){
                 y_range.push_back(1);
+              }
+              if(location % num_bin_row != 0){
+                x_range.push_back(-1);
+              }
+              if(location != num_bin_row - 1){
+                x_range.push_back(1);
               }
                 cout<<"de66"<<endl;
               for(int a = 0; a < x_range.size();a++){
                 for(int b = 0; b< y_range.size(); b++){
                   cout<<"de67"<<endl;
                   int bin_num = location + x_range[a] + num_bin_row*y_range[b];
+                  cout<<bin_num<<endl;
                   cout<<"de68"<<endl;
                   for(int c = 0; c < bins[location].size(); c++){
                     cout<<"de69"<<endl;
