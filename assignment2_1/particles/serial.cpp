@@ -65,7 +65,7 @@ int main( int argc, char **argv )
     int num_bin_row = 0;
     create_bins(bins, particles, n, num_bin_row);
     int num_bins = num_bin_row * num_bin_row;
-
+    cout<<"de1"<<endl;
     //
     //  simulate a number of time steps
     //
@@ -78,7 +78,7 @@ int main( int argc, char **argv )
 	     dmin = 1.0;
 
        //clean the bins first
-
+       cout<<"de2"<<endl;
        for(int i = 0; i < num_bins; i++){
          bins[i].clear();
        }
@@ -131,9 +131,9 @@ int main( int argc, char **argv )
         //
         //  move particles
         //
+        cout<<"de3"<<endl;
         for( int p = 0; p < n; p++ )
             move( particles[p] );
-
         if( find_option( argc, argv, "-no" ) == -1 )
         {
           //
