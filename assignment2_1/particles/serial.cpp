@@ -4,6 +4,7 @@
 #include <math.h>
 #include "common.h"
 #include <vector>
+#include <iostream>
 using namespace std;
 //
 //  tuned constants copyed from common.cpp
