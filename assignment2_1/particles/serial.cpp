@@ -3,7 +3,31 @@
 #include <assert.h>
 #include <math.h>
 #include "common.h"
+//
+//  tuned constants copyed from common.cpp
+//
+#define density 0.0005
+#define mass    0.01
+#define cutoff  0.01
+#define min_r   (cutoff/100)
+#define dt      0.0005
+//
+//create bins with length of cutoff
+//
+void create_bins(vector<vector<particle_t>>& bins, particle_t* particles, int n, int &num_bin_row){
+  //according to the common.cpp
+  //calculate the size
+  double size = sqrt(density * n);
 
+  //the min length of bin shouble be cutoff such that all particles are considered
+  double bin_side_length = cutoff;
+  //the number of bins in a row
+  num_bin_row = ceil(size / bin_side_length);
+  //resize the vector to the exact size of bins
+  bins.resize(num_bin_row * num_bin_row);
+
+
+}
 //
 //  benchmarking program
 //
@@ -34,6 +58,11 @@ int main( int argc, char **argv )
     particle_t *particles = (particle_t*) malloc( n * sizeof(particle_t) );
     set_size( n );
     init_particles( n, particles );
+    //create the bins to contain the particles
+    vector<vector<particle_t>> bins;
+    int num_bin_row = 0;
+    create_bin(bins, particles, n, num_bin_row);
+    int num_bins = num_bin_row * num_bin_row;
 
     //
     //  simulate a number of time steps
@@ -45,21 +74,62 @@ int main( int argc, char **argv )
 	     navg = 0;
        davg = 0.0;
 	     dmin = 1.0;
+
+       //clean the bins first
+
+       for(int i = 0; i < num_bins; i++){
+         bins[i].clear();
+       }
+       //put particles in bins according to their locations
+       for(int j = 0; j < n;j++){
+         int x = floor(particles[j].x/cutoff);
+         int y = floor(particles[j].y/cutoff);
+         bins[x + num_bin_row * y].push_back(particles[j]);
+       }
         //
         //  compute forces
         //
         for( int i = 0; i < n; i++ )
         {
             particles[i].ax = particles[i].ay = 0;
-            for (int j = 0; j < n; j++ )
-				       apply_force( particles[i], particles[j],&dmin,&davg,&navg);
-        }
 
+
+              int cx = floor(particles[i].x/cutoff);
+              int cy = floor(particles[i].y/cutoff);
+              int location = cx + num_bin_row * cy;
+              vector<int> x_range;
+              vector<int> y_range;
+              // int startx = -1; // the begin row of bin
+              // int endx = 1;
+              // int starty = -1;
+              // int endy = 1;
+              x_range.push_back(0);
+              y_range.push_back(0);
+              if(location >= num_bin_row){
+                x_range.push_back(-1);
+              }
+              if(location < num_bin_row*(num_bin_row-1) ){
+                x_range.push_back(1)
+              }
+              if(location % num_bin_row != 0){
+                y_range.push_back(-1);
+              }
+              if(location < num_bin_row*(num_bin_row - 1)){
+                y_range.push_back(1);
+              }
+              for(auto a : x_range){
+                for(auto b : y_range){
+                  int bin_num = location + b + num_bin_row*a;
+                  for(int c = 0; c < bins[location].size(); c++){
+                    apply_force(particles[i], *bins[bin_num][c], &dmin, &davg, &navg);
+                  }
+                }
+              }
         //
         //  move particles
         //
-        for( int i = 0; i < n; i++ )
-            move( particles[i] );
+        for( int p = 0; p < n; p++ )
+            move( particles[p] );
 
         if( find_option( argc, argv, "-no" ) == -1 )
         {
