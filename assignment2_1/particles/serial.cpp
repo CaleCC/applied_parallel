@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <math.h>
 #include "common.h"
-using std::vector;
+using namespace std;
 //
 //  tuned constants copyed from common.cpp
 //
