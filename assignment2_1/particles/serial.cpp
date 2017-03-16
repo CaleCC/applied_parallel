@@ -83,19 +83,21 @@ int main( int argc, char **argv )
        for(int i = 0; i < num_bins; i++){
          bins[i].clear();
        }
+       cout<<"de3"<<endl;
        //put particles in bins according to their locations
        for(int j = 0; j < n;j++){
          int x = floor(particles[j].x/cutoff);
          int y = floor(particles[j].y/cutoff);
          bins[x + num_bin_row * y].push_back(&particles[j]);
        }
+       cout<<"de4"<<endl;
         //
         //  compute forces
         //
         for( int i = 0; i < n; i++ )
         {
             particles[i].ax = particles[i].ay = 0;
-
+            cout<<"de44"<<endl;
 
               int cx = floor(particles[i].x/cutoff);
               int cy = floor(particles[i].y/cutoff);
@@ -106,6 +108,7 @@ int main( int argc, char **argv )
               // int endx = 1;
               // int starty = -1;
               // int endy = 1;
+              cout<<"de55"<<endl;
               x_range.push_back(0);
               y_range.push_back(0);
               if(location >= num_bin_row){
@@ -120,6 +123,7 @@ int main( int argc, char **argv )
               if(location < num_bin_row*(num_bin_row - 1)){
                 y_range.push_back(1);
               }
+                cout<<"de66"<<endl;
               for(int a = 0; a < x_range.size();a++){
                 for(int b = 0; b< y_range.size(); b++){
                   int bin_num = location + y_range[b] + num_bin_row*x_range[a];
@@ -128,6 +132,7 @@ int main( int argc, char **argv )
                   }
                 }
               }
+              cout<<"de76"<<endl;
         }
         //
         //  move particles
