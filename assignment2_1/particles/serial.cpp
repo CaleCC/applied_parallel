@@ -16,7 +16,7 @@ using namespace std;
 //
 //create bins with length of cutoff
 //
-void create_bins(vector<vector<particle_t>>& bins, particle_t* particles, int n, int & num_bin_row){
+void create_bins(vector<vector<particle_t> > &bins, particle_t* particles, int n, int & num_bin_row){
   //according to the common.cpp
   //calculate the size
   double size = sqrt(density * n);
@@ -61,9 +61,9 @@ int main( int argc, char **argv )
     set_size( n );
     init_particles( n, particles );
     //create the bins to contain the particles
-    vector<vector<particle_t>> bins;
+    vector<vector<particle_t> > bins;
     int num_bin_row = 0;
-    create_bin(bins, particles, n, num_bin_row);
+    create_bins(bins, particles, n, num_bin_row);
     int num_bins = num_bin_row * num_bin_row;
 
     //
@@ -111,7 +111,7 @@ int main( int argc, char **argv )
                 x_range.push_back(-1);
               }
               if(location < num_bin_row*(num_bin_row-1) ){
-                x_range.push_back(1)
+                x_range.push_back(1);
               }
               if(location % num_bin_row != 0){
                 y_range.push_back(-1);
@@ -119,9 +119,9 @@ int main( int argc, char **argv )
               if(location < num_bin_row*(num_bin_row - 1)){
                 y_range.push_back(1);
               }
-              for(auto a : x_range){
-                for(auto b : y_range){
-                  int bin_num = location + b + num_bin_row*a;
+              for(int a = 0; a < x_range.size();a++){
+                for(int b = 0; b< y_range.size(); b++){
+                  int bin_num = location + y_range[b] + num_bin_row*x_range[a];
                   for(int c = 0; c < bins[location].size(); c++){
                     apply_force(particles[i], *bins[bin_num][c], &dmin, &davg, &navg);
                   }
