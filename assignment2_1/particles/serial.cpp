@@ -205,8 +205,10 @@ int main(int argc, char **argv)
 			//
 			//  save if necessary
 			//
+			printf("Starting save\n");
 			if (fsave && (step%SAVEFREQ) == 0)
 				save(fsave, n, particles);
+			printf("Save complete\n");
 		}
 	}
 	simulation_time = read_timer() - simulation_time;
