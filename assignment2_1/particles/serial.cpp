@@ -65,6 +65,8 @@ int main(int argc, char **argv)
 
 	particle_t *particles;
 
+	vector<particle_t*> temp_move;
+
 	if ((particles = (particle_t*)malloc(n * sizeof(particle_t))) == NULL) {
 		printf("particles malloc NULL\n");
 		return 0;
@@ -153,10 +155,11 @@ int main(int argc, char **argv)
 		//  The particles must also be moved between bins as necessary.
 		//
 		double binsize = cutoff * 2;
+
 		for (int b = 0; b < num_bins; b++)
 		{//Insert logic here
 			for (int p = bins[b].size() - 1; p >= 0; p--) {
-				printf("Moving particle in bin %d, p = %d\n", b, p);
+				//printf("Moving particle in bin %d, p = %d\n", b, p);
 				move(*bins[b][p]);
 
 				int x = floor(bins[b][p]->x / binsize);
@@ -166,7 +169,7 @@ int main(int argc, char **argv)
 					printf("Moving particles between bin %d and %d\n", x+y*num_bin_row, b);
 					//printf("before: bins[x + y * num_bin_row].back() = %p\n",bins[x + y * num_bin_row].back() );
 					//printf("before: bins[b].size(): %d\n", bins[b].size());
-					bins[x + y * num_bin_row].push_back(bins[b][p]);
+					temp_move.push_back(bins[b][p]);
 					bins[b].erase(bins[b].begin() + p);
 					//printf("after: bins[x + y * num_bin_row].back() = %p\n",bins[x + y * num_bin_row].back() );
 					//printf("after: bins[b].size(): %d\n", bins[b].size());
@@ -174,6 +177,11 @@ int main(int argc, char **argv)
 					//return 0;
 				}
 			}
+		}
+		for(int i = 0; i < temp_move.size(); i++){
+			int x = floor(temp_move[i]->x / binsize);
+			int y = floor(temp_move[i]->y / binsize);
+			bins[x + y * num_bin_row].push_back(temp_move[i]);
 		}
 
 		if (find_option(argc, argv, "-no") == -1)
