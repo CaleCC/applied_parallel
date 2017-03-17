@@ -14,6 +14,7 @@ using namespace std;
 #define cutoff  0.01
 #define min_r   (cutoff/100)
 #define dt      0.0005
+#define binsize cutoff*2
 //
 //create bins with length of cutoff
 //
@@ -21,13 +22,13 @@ void create_bins(vector<vector<particle_t*>> &bins, particle_t* particles, int n
   //size = sqrt(density * n)
   //bin_length = 2*cutoff
   //the number of bins in a row = size / binlength. Round up.
-  num_bin_row = ceil((sqrt(density * n)) / (2 * cutoff));
+  num_bin_row = ceil((sqrt(density * n)) / (binsize));
   //resize the vector to the exact size of bins.
   bins.resize(num_bin_row * num_bin_row);    
   //put particles in bins according to their locations
   for(int j = 0; j < n; j++){
-    int x = floor(particles[j].x/cutoff);
-    int y = floor(particles[j].y/cutoff);
+    int x = floor(particles[j].x/binsize);
+    int y = floor(particles[j].y/binsize);
     bins[x + y * num_bin_row ].push_back(&particles[j]);
   }
   cout<<"create_bins"<<endl;
@@ -132,7 +133,7 @@ int main( int argc, char **argv )
                   for(int c = 0; c < bins[i].size(); c++){
                     for(int d = 0; d < bins[bin_num].size(); d++){
                       cout<<"de69"<<endl;
-                      apply_force(*bins[i][c], *bins[bin_num][d], &dmin, &davg, &navg);
+                      apply_force(bins[i][c], bins[bin_num][d], &dmin, &davg, &navg);
                       cout<<"de70"<<endl;
                     }
                   }
@@ -145,9 +146,21 @@ int main( int argc, char **argv )
         //  The particles must also be moved between bins as necessary.
         //
         cout<<"de3"<<endl;
-        for( int p = 0; p < n; p++ )
-          //Insert logic here
-            move( particles[p] );
+        for( int b = 0; b < num_bins; b++ )
+          {//Insert logic here
+            for( int p = bins[b].size() - 1; p >= 0 ; p--){
+              move( bins[b][p] );
+                        
+              int x = floor(bins[b][p]->x/binsize);
+              int y = floor(bins[b][p]->y/binsize);
+              if(y * num_bin_row + x != b)
+              {
+                bins[x + y * num_bin_row ].push_back(bins[b][p]);
+                bins[b].erase(p);
+              }
+            }
+        }
+
         if( find_option( argc, argv, "-no" ) == -1 )
         {
           //
