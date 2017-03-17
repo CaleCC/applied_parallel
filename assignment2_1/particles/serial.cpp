@@ -183,6 +183,8 @@ int main(int argc, char **argv)
 		for(int i = 0; i < temp_move.size(); i++){
 			int x = floor(temp_move[i]->x / binsize);
 			int y = floor(temp_move[i]->y / binsize);
+			printf("Pushing particle into bin[%d]\n", x+y*num_bin_row);
+					
 			bins[x + y * num_bin_row].push_back(temp_move[i]);
 		}
 		temp_move.clear();
