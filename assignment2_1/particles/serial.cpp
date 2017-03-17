@@ -208,7 +208,7 @@ int main(int argc, char **argv)
 			if (fsave && (step%SAVEFREQ) == 0)
 				save(fsave, n, particles);
 		}
-		printf("Nextloop. \n");
+		printf("Nextloop. Step: %d\n", step);
 	}
 	simulation_time = read_timer() - simulation_time;
 
