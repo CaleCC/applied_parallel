@@ -160,7 +160,7 @@ int main(int argc, char **argv)
 		for (int b = 0; b < num_bins; b++)
 		{//Insert logic here
 			int size = bins[b].size();
-			for (int p = 0; p < size; p++) {
+			for (int p = 0; p < size;) {
 				//printf("Moving particle in bin %d, p = %d\n", b, p);
 				move(*bins[b][p]);
 
@@ -172,8 +172,10 @@ int main(int argc, char **argv)
 					printf("Moving particles between bin %d and %d\n", x+y*num_bin_row, b);
 					temp_move.push_back(bins[b][p]);
 					bins[b].erase(bins[b].begin() + p);
-					p--;
 					size--;
+				}
+				else{
+					p++;
 				}
 			}
 		}
