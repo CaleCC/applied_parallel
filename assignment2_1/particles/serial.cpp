@@ -133,7 +133,7 @@ int main( int argc, char **argv )
                   for(int c = 0; c < bins[i].size(); c++){
                     for(int d = 0; d < bins[bin_num].size(); d++){
                       cout<<"de69"<<endl;
-                      apply_force(bins[i][c], bins[bin_num][d], &dmin, &davg, &navg);
+                      apply_force(*bins[i][c], *bins[bin_num][d], &dmin, &davg, &navg);
                       cout<<"de70"<<endl;
                     }
                   }
@@ -156,7 +156,7 @@ int main( int argc, char **argv )
               if(y * num_bin_row + x != b)
               {
                 bins[x + y * num_bin_row ].push_back(bins[b][p]);
-                bins[b].erase(p);
+                bins[b].erase(bins[b].begin+p);
               }
             }
         }
