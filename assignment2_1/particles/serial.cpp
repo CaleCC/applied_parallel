@@ -34,7 +34,7 @@ void create_bins(vector<vector<particle_t*> > &bins, particle_t* particles, int 
 		printf("Pushing back x: %d, y: %d, into %d\n", x, y, x + y*num_bin_row);
 		bins[x + y * num_bin_row].push_back(&particles[j]);
 	}
-	printf("create_bins completed");
+	printf("create_bins completed\n");
 }
 //
 //  benchmarking program
@@ -87,6 +87,7 @@ int main(int argc, char **argv)
 
 	for (int step = 0; step < NSTEPS; step++)
 	{
+		printf("Step: %d", step);
 		navg = 0;
 		davg = 0.0;
 		dmin = 1.0;
@@ -167,14 +168,8 @@ int main(int argc, char **argv)
 				if (y * num_bin_row + x != b)
 				{
 					printf("Moving particles between bin %d and %d\n", x+y*num_bin_row, b);
-					//printf("before: bins[x + y * num_bin_row].back() = %p\n",bins[x + y * num_bin_row].back() );
-					//printf("before: bins[b].size(): %d\n", bins[b].size());
 					temp_move.push_back(bins[b][p]);
 					bins[b].erase(bins[b].begin() + p);
-					//printf("after: bins[x + y * num_bin_row].back() = %p\n",bins[x + y * num_bin_row].back() );
-					//printf("after: bins[b].size(): %d\n", bins[b].size());
-					//printf("ending early to debug\n");
-					//return 0;
 				}
 			}
 		}
