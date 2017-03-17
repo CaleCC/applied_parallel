@@ -163,12 +163,12 @@ int main(int argc, char **argv)
 				int y = floor(bins[b][p]->y / binsize);
 				if (y * num_bin_row + x != b)
 				{
+					printf("before: bins[x + y * num_bin_row].back() = %p\n",bins[x + y * num_bin_row].back() );
+					printf("before: bins[b].size(): %p\n", bins[b].size());
 					bins[x + y * num_bin_row].push_back(bins[b][p]);
-					printf("before: bins[x + y * num_bin_row].back() = %g\n",bins[x + y * num_bin_row].back() );
-					printf("before: bins[b][p]: %g\n", bins[b][p]);
 					bins[b].erase(bins[b].begin() + p);
-					printf("after: bins[x + y * num_bin_row].back() = %g\n",bins[x + y * num_bin_row].back() );
-					printf("after: bins[b][p]: %g\n", bins[b][p]);
+					printf("after: bins[x + y * num_bin_row].back() = %p\n",bins[x + y * num_bin_row].back() );
+					printf("after: bins[b].size(): %p\n", bins[b].size());
 					printf("ending early to debug\n");
 					return 0;
 				}
