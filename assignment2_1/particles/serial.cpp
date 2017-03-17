@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 
 	for (int step = 0; step < NSTEPS; step++)
 	{
-		printf("Step: %d", step);
+		printf("Step: %d\n", step);
 		navg = 0;
 		davg = 0.0;
 		dmin = 1.0;
@@ -167,6 +167,7 @@ int main(int argc, char **argv)
 				int y = floor(bins[b][p]->y / binsize);
 				if (y * num_bin_row + x != b)
 				{
+					printf("p is %d\n", p);
 					printf("Moving particles between bin %d and %d\n", x+y*num_bin_row, b);
 					temp_move.push_back(bins[b][p]);
 					bins[b].erase(bins[b].begin() + p);
