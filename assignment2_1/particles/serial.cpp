@@ -22,14 +22,17 @@ void create_bins(vector<vector<particle_t*> > &bins, particle_t* particles, int 
 	//size = sqrt(density * n)
 	//bin_length = 2*cutoff
 	//the number of bins in a row = size / binlength. Round up.
-	num_bin_row = ceil((sqrt(density * n)) / (binsize));
+	double size = sqrt(density * (double)n);
+	num_bin_row = ceil(size / binsize);
 	//resize the vector to the exact size of bins.
 	printf("bins.resize\n");
+	printf("num_bin_row is %f", num_bin_row);
 	bins.resize(num_bin_row * num_bin_row);
 	//put particles in bins according to their locations
 	for (int j = 0; j < n; j++) {
 		int x = floor(particles[j].x / binsize);
 		int y = floor(particles[j].y / binsize);
+		printf("Pushing back x: %d, y: %d\n", x, y);
 		bins[x + y * num_bin_row].push_back(&particles[j]);
 	}
 	printf("create_bins completed");
