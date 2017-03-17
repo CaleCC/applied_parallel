@@ -26,13 +26,13 @@ void create_bins(vector<vector<particle_t*> > &bins, particle_t* particles, int 
 	num_bin_row = ceil(size / binsize);
 	//resize the vector to the exact size of bins.
 	printf("bins.resize\n");
-	printf("num_bin_row is %f", num_bin_row);
+	printf("num_bin_row is %d\n", num_bin_row);
 	bins.resize(num_bin_row * num_bin_row);
 	//put particles in bins according to their locations
 	for (int j = 0; j < n; j++) {
 		int x = floor(particles[j].x / binsize);
 		int y = floor(particles[j].y / binsize);
-		printf("Pushing back x: %d, y: %d\n", x, y);
+		printf("Pushing back x: %d, y: %d, into %d\n", x, y, x + y*num_bin_row);
 		bins[x + y * num_bin_row].push_back(&particles[j]);
 	}
 	printf("create_bins completed");
@@ -138,16 +138,16 @@ int main(int argc, char **argv)
 					printf("bin_num: %d\n",bin_num);
 					for (int c = 0; c < bins[i].size(); c++) {
 						for (int d = 0; d < bins[bin_num].size(); d++) {
-							printf("apply_force begin");
+							printf("apply_force begin\n");
 							apply_force(*bins[i][c], *bins[bin_num][d], &dmin, &davg, &navg);
-							printf("apply_force end");
+							printf("apply_force end\n");
 						}
 					}
 				}
 			}
-			printf("Single bin completed");
+			printf("Single bin completed\n");
 		}
-		printf("All bins completed");
+		printf("All bins completed\n");
 		//
 		//  move particles
 		//  The particles must also be moved between bins as necessary.
