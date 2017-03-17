@@ -14,19 +14,18 @@ using namespace std;
 #define cutoff  0.01
 #define min_r   (cutoff/100)
 #define dt      0.0005
-#define binsize cutoff*2
 //
 //create bins with length of cutoff
 //
 void create_bins(vector<vector<particle_t*> > &bins, particle_t* particles, int n, int & num_bin_row) {
 	//size = sqrt(density * n)
-	//bin_length = 2*cutoff
+	double binsize = 2 * cutoff;
 	//the number of bins in a row = size / binlength. Round up.
-	double size = sqrt(density * (double)n);
+	double size = sqrt(density * n); //This is from common.cpp
 	num_bin_row = ceil(size / binsize);
+	printf("num_bin_row is %d\n", num_bin_row);
 	//resize the vector to the exact size of bins.
 	printf("bins.resize\n");
-	printf("num_bin_row is %d\n", num_bin_row);
 	bins.resize(num_bin_row * num_bin_row);
 	//put particles in bins according to their locations
 	for (int j = 0; j < n; j++) {
@@ -135,7 +134,8 @@ int main(int argc, char **argv)
 			for (int a = 0; a < x_range.size(); a++) {
 				for (int b = 0; b < y_range.size(); b++) {
 					int bin_num = i + x_range[a] + num_bin_row*y_range[b];
-					printf("bin_num: %d\n",bin_num);
+					printf("i: %d, bin_num: %d, bins[i].size(): %d, bins[bin_num].size(): %d\n",i, bin_num, bins[i].size(), bins[bin_num].size());
+
 					for (int c = 0; c < bins[i].size(); c++) {
 						for (int d = 0; d < bins[bin_num].size(); d++) {
 							printf("apply_force begin\n");
@@ -152,6 +152,7 @@ int main(int argc, char **argv)
 		//  move particles
 		//  The particles must also be moved between bins as necessary.
 		//
+		double binsize = cutoff * 2;
 		for (int b = 0; b < num_bins; b++)
 		{//Insert logic here
 			for (int p = bins[b].size() - 1; p >= 0; p--) {
