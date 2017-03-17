@@ -61,7 +61,7 @@ int main(int argc, char **argv)
 	FILE *fsave = savename ? fopen(savename, "w") : NULL;
 	FILE *fsum = sumname ? fopen(sumname, "a") : NULL;
 
-	if (particle_t *particles = (particle_t*)malloc(n * sizeof(particle_t)) == NULL) {
+	if ((particle_t *particles = (particle_t*)malloc(n * sizeof(particle_t))) == NULL) {
 		printf("particles malloc NULL\n");
 		return 0;
 	}
