@@ -99,7 +99,7 @@ int main(int argc, char **argv)
 			for (int j = 0; j < particles_per_bin; j++) {
 				particles[i].ax = particles[i].ay = 0;
 			}
-			printf("Accelerations zeroed\n");
+			//printf("Accelerations zeroed\n");
 
 			//Search within current bin and a 'halo region'
 			//Halo region may be defined as the region around the bin of size 'cutoff'
@@ -129,7 +129,7 @@ int main(int argc, char **argv)
 			if (location != num_bin_row - 1) {
 				x_range.push_back(1);
 			}
-			printf("x and y ranges initialized.\n");
+			//printf("x and y ranges initialized.\n");
 			//This should manage the ranges such that the halo region is searched.
 			for (int a = 0; a < x_range.size(); a++) {
 				for (int b = 0; b < y_range.size(); b++) {
@@ -140,14 +140,14 @@ int main(int argc, char **argv)
 						for (int d = 0; d < bins[bin_num].size(); d++) {
 							//printf("apply_force begin");
 							apply_force(*bins[i][c], *bins[bin_num][d], &dmin, &davg, &navg);
-							printf("apply_force end\n");
+							//printf("apply_force end\n");
 						}
 					}
 				}
 			}
-			printf("Single bin completed\n");
+			//printf("Single bin completed\n");
 		}
-		printf("All bins completed\n");
+		//printf("All bins completed\n");
 		//
 		//  move particles
 		//  The particles must also be moved between bins as necessary.
@@ -163,14 +163,15 @@ int main(int argc, char **argv)
 				int y = floor(bins[b][p]->y / binsize);
 				if (y * num_bin_row + x != b)
 				{
-					printf("before: bins[x + y * num_bin_row].back() = %p\n",bins[x + y * num_bin_row].back() );
-					printf("before: bins[b].size(): %p\n", bins[b].size());
+					printf("Moving particles between bin %d and %d\n", x+y*num_bin_row, b);
+					//printf("before: bins[x + y * num_bin_row].back() = %p\n",bins[x + y * num_bin_row].back() );
+					//printf("before: bins[b].size(): %d\n", bins[b].size());
 					bins[x + y * num_bin_row].push_back(bins[b][p]);
 					bins[b].erase(bins[b].begin() + p);
-					printf("after: bins[x + y * num_bin_row].back() = %p\n",bins[x + y * num_bin_row].back() );
-					printf("after: bins[b].size(): %p\n", bins[b].size());
-					printf("ending early to debug\n");
-					return 0;
+					//printf("after: bins[x + y * num_bin_row].back() = %p\n",bins[x + y * num_bin_row].back() );
+					//printf("after: bins[b].size(): %d\n", bins[b].size());
+					//printf("ending early to debug\n");
+					//return 0;
 				}
 			}
 		}
