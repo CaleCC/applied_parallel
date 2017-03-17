@@ -186,8 +186,10 @@ int main(int argc, char **argv)
 			printf("Pushing particle into bin[%d]\n", x+y*num_bin_row);
 					
 			bins[x + y * num_bin_row].push_back(temp_move[i]);
+			printf("Pushback complete\n");
 		}
 		temp_move.clear();
+		printf("temp_move cleared\n");
 
 		if (find_option(argc, argv, "-no") == -1)
 		{
