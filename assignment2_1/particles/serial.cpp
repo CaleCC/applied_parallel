@@ -24,6 +24,7 @@ void create_bins(vector<vector<particle_t*> > &bins, particle_t* particles, int 
 	//the number of bins in a row = size / binlength. Round up.
 	num_bin_row = ceil((sqrt(density * n)) / (binsize));
 	//resize the vector to the exact size of bins.
+	printf("bins.resize\n");
 	bins.resize(num_bin_row * num_bin_row);
 	//put particles in bins according to their locations
 	for (int j = 0; j < n; j++) {
@@ -31,7 +32,7 @@ void create_bins(vector<vector<particle_t*> > &bins, particle_t* particles, int 
 		int y = floor(particles[j].y / binsize);
 		bins[x + y * num_bin_row].push_back(&particles[j]);
 	}
-	printf("create_bins");
+	printf("create_bins completed");
 }
 //
 //  benchmarking program
@@ -110,7 +111,6 @@ int main(int argc, char **argv)
 			// int endx = 1;
 			// int starty = -1;
 			// int endy = 1;
-			printf("de55");
 			x_range.push_back(0);
 			y_range.push_back(0);
 			if (location >= num_bin_row) {
@@ -125,19 +125,17 @@ int main(int argc, char **argv)
 			if (location != num_bin_row - 1) {
 				x_range.push_back(1);
 			}
-			printf("de66");
+			printf("x and y ranges initialized.\n");
 			//This should manage the ranges such that the halo region is searched.
 			for (int a = 0; a < x_range.size(); a++) {
 				for (int b = 0; b < y_range.size(); b++) {
-					printf("de67");
 					int bin_num = i + x_range[a] + num_bin_row*y_range[b];
-					printf(bin_num);
-					printf("de68");
+					printf("bin_num: %d\n",bin_num);
 					for (int c = 0; c < bins[i].size(); c++) {
 						for (int d = 0; d < bins[bin_num].size(); d++) {
-							printf("de69");
+							printf("apply_force begin");
 							apply_force(*bins[i][c], *bins[bin_num][d], &dmin, &davg, &navg);
-							printf("de70");
+							printf("apply_force end");
 						}
 					}
 				}
@@ -152,6 +150,7 @@ int main(int argc, char **argv)
 		for (int b = 0; b < num_bins; b++)
 		{//Insert logic here
 			for (int p = bins[b].size() - 1; p >= 0; p--) {
+				printf("Moving particle in bin %d, p = %d\n", b, p);
 				move(*bins[b][p]);
 
 				int x = floor(bins[b][p]->x / binsize);
