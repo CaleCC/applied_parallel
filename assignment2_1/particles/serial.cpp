@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 
 	for (int step = 0; step < NSTEPS; step++)
 	{
-		printf("Step: %d\n", step);
+		printf("Step: %d\t", step);
 		navg = 0;
 		davg = 0.0;
 		dmin = 1.0;
@@ -99,6 +99,7 @@ int main(int argc, char **argv)
 		{
 			vector<particle_t*> binQ = bins[i];
 			int particles_per_bin = binQ.size();
+			printf("binQ size: %d\t" particles_per_bin);
 			for (int j = 0; j < particles_per_bin; j++) {
 				particles[i].ax = particles[i].ay = 0;
 			}
@@ -150,7 +151,7 @@ int main(int argc, char **argv)
 			}
 			//printf("Single bin completed\n");
 		}
-		//printf("All bins completed\n");
+		printf("\nAll bins completed\n");
 		//
 		//  move particles
 		//  The particles must also be moved between bins as necessary.
@@ -169,7 +170,7 @@ int main(int argc, char **argv)
 				if (y * num_bin_row + x != b)
 				{
 					printf("p is %d\n", p);
-					printf("Moving particles between bin %d and %d\n", x+y*num_bin_row, b);
+					printf("Moving particles from bin %d to %d\n", b, x+y*num_bin_row);
 					temp_move.push_back(bins[b][p]);
 					bins[b].erase(bins[b].begin() + p);
 					size--;
