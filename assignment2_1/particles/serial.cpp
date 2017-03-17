@@ -99,7 +99,7 @@ int main(int argc, char **argv)
 		{
 			vector<particle_t*> binQ = bins[i];
 			int particles_per_bin = binQ.size();
-			printf("binQ size: %d\t" particles_per_bin);
+			printf("binQ size: %d\t", particles_per_bin);
 			for (int j = 0; j < particles_per_bin; j++) {
 				particles[i].ax = particles[i].ay = 0;
 			}
@@ -185,6 +185,7 @@ int main(int argc, char **argv)
 			int y = floor(temp_move[i]->y / binsize);
 			bins[x + y * num_bin_row].push_back(temp_move[i]);
 		}
+		temp_move.clear();
 
 		if (find_option(argc, argv, "-no") == -1)
 		{
