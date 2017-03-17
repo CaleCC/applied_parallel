@@ -129,7 +129,7 @@ int main(int argc, char **argv)
 			if (location % num_bin_row != 0) {
 				x_range.push_back(-1);
 			}
-			if (location != num_bin_row - 1) {
+			if (location % num_bin_row != num_bin_row - 1) {
 				x_range.push_back(1);
 			}
 			//printf("x and y ranges initialized.\n");
