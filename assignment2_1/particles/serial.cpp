@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	//int n = read_int(argc, argv, "-n", 1000);
+	int n = read_int(argc, argv, "-n", 1000);
 
 	char *savename = read_string(argc, argv, "-o", NULL);
 	char *sumname = read_string(argc, argv, "-s", NULL);
@@ -63,8 +63,6 @@ int main(int argc, char **argv)
 
 	FILE *fsave = savename ? fopen(savename, "w") : NULL;
 	FILE *fsum = sumname ? fopen(sumname, "a") : NULL;
-
-	int n = 10;
 
 	particle_t *particles;
 
