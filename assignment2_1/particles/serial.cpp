@@ -23,18 +23,18 @@ void create_bins(vector<vector<particle_t*> > &bins, particle_t* particles, int 
 	//the number of bins in a row = size / binlength. Round up.
 	double size = sqrt(density * n); //This is from common.cpp
 	num_bin_row = ceil(size / binsize);
-	printf("num_bin_row is %d\n", num_bin_row);
+	//printf("num_bin_row is %d\n", num_bin_row);
 	//resize the vector to the exact size of bins.
-	printf("bins.resize\n");
+	//printf("bins.resize\n");
 	bins.resize(num_bin_row * num_bin_row);
 	//put particles in bins according to their locations
 	for (int j = 0; j < n; j++) {
 		int x = floor(particles[j].x / binsize);
 		int y = floor(particles[j].y / binsize);
-		printf("Pushing back x: %d, y: %d, into %d\n", x, y, x + y*num_bin_row);
+		//printf("Pushing back x: %d, y: %d, into %d\n", x, y, x + y*num_bin_row);
 		bins[x + y * num_bin_row].push_back(&particles[j]);
 	}
-	printf("create_bins completed\n");
+	//printf("create_bins completed\n");
 }
 //
 //  benchmarking program
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
 	int num_bin_row = 0;
 	create_bins(bins, particles, n, num_bin_row);
 	int num_bins = num_bin_row * num_bin_row;
-	printf("Bins Created\n");
+	//printf("Bins Created\n");
 	//
 	//  simulate a number of time steps
 	//
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
 
 	for (int step = 0; step < NSTEPS; step++)
 	{
-		printf("Step: %d\t", step);
+		//printf("Step: %d\t", step);
 		navg = 0;
 		davg = 0.0;
 		dmin = 1.0;
@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 		{
 			vector<particle_t*> binQ = bins[i];
 			int particles_per_bin = binQ.size();
-			printf("binQ size: %d\t", particles_per_bin);
+			//printf("binQ size: %d\t", particles_per_bin);
 			for (int j = 0; j < particles_per_bin; j++) {
 				binQ[j]->ax = binQ[j]->ay = 0;
 			}
@@ -152,7 +152,7 @@ int main(int argc, char **argv)
 			}
 			//printf("Single bin completed\n");
 		}
-		printf("\nAll bins completed\n");
+		//printf("\nAll bins completed\n");
 		//
 		//  move particles
 		//  The particles must also be moved between bins as necessary.
@@ -170,8 +170,8 @@ int main(int argc, char **argv)
 				int y = floor(bins[b][p]->y / binsize);
 				if (y * num_bin_row + x != b)
 				{
-					printf("p is %d\n", p);
-					printf("Moving particles from bin %d to %d\n", b, x+y*num_bin_row);
+					//printf("p is %d\n", p);
+					//printf("Moving particles from bin %d to %d\n", b, x+y*num_bin_row);
 					temp_move.push_back(bins[b][p]);
 					bins[b].erase(bins[b].begin() + p);
 					size--;
@@ -184,13 +184,13 @@ int main(int argc, char **argv)
 		for(int i = 0; i < temp_move.size(); i++){
 			int x = floor(temp_move[i]->x / binsize);
 			int y = floor(temp_move[i]->y / binsize);
-			printf("Pushing particle into bin[%d]\n", x+y*num_bin_row);
+			//printf("Pushing particle into bin[%d]\n", x+y*num_bin_row);
 					
 			bins[x + y * num_bin_row].push_back(temp_move[i]);
-			printf("Pushback complete\n");
+			//printf("Pushback complete\n");
 		}
 		temp_move.clear();
-		printf("temp_move cleared\n");
+		//printf("temp_move cleared\n");
 
 		if (find_option(argc, argv, "-no") == -1)
 		{
@@ -209,7 +209,7 @@ int main(int argc, char **argv)
 			if (fsave && (step%SAVEFREQ) == 0)
 				save(fsave, n, particles);
 		}
-		printf("Nextloop. Step: %d\n", step);
+		//printf("Nextloop. Step: %d\n", step);
 	}
 	simulation_time = read_timer() - simulation_time;
 
