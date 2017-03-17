@@ -134,11 +134,11 @@ int main(int argc, char **argv)
 			for (int a = 0; a < x_range.size(); a++) {
 				for (int b = 0; b < y_range.size(); b++) {
 					int bin_num = i + x_range[a] + num_bin_row*y_range[b];
-					printf("i: %d, bin_num: %d, bins[i].size(): %d, bins[bin_num].size(): %d\n",i, bin_num, bins[i].size(), bins[bin_num].size());
+					//printf("i: %d, bin_num: %d, bins[i].size(): %d, bins[bin_num].size(): %d\n",i, bin_num, bins[i].size(), bins[bin_num].size());
 
 					for (int c = 0; c < bins[i].size(); c++) {
 						for (int d = 0; d < bins[bin_num].size(); d++) {
-							printf("apply_force begin\n");
+							//printf("apply_force begin");
 							apply_force(*bins[i][c], *bins[bin_num][d], &dmin, &davg, &navg);
 							printf("apply_force end\n");
 						}
@@ -164,7 +164,13 @@ int main(int argc, char **argv)
 				if (y * num_bin_row + x != b)
 				{
 					bins[x + y * num_bin_row].push_back(bins[b][p]);
+					printf("before: bins[x + y * num_bin_row].back() = %g\n",bins[x + y * num_bin_row].back() );
+					printf("before: bins[b][p]: %g\n", bins[b][p]);
 					bins[b].erase(bins[b].begin() + p);
+					printf("after: bins[x + y * num_bin_row].back() = %g\n",bins[x + y * num_bin_row].back() );
+					printf("after: bins[b][p]: %g\n", bins[b][p]);
+					printf("ending early to debug\n");
+					return 0;
 				}
 			}
 		}
