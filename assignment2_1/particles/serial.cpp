@@ -7,7 +7,7 @@
 #include <iostream>
 using namespace std;
 //
-//  tuned constants copyed from common.cpp
+//  tuned constants copied from common.cpp
 //
 #define density 0.0005
 #define mass    0.01
@@ -17,19 +17,20 @@ using namespace std;
 //
 //create bins with length of cutoff
 //
-void create_bins(vector<vector<particle_t*> > &bins, particle_t* particles, int n, int & num_bin_row){
-  //according to the common.cpp
-  //calculate the size
-  double size = sqrt(density * n);
-
-  //the min length of bin shouble be cutoff such that all particles are considered
-  double bin_side_length = cutoff;
-  //the number of bins in a row
-  num_bin_row = ceil(size / bin_side_length);
-  //resize the vector to the exact size of bins
-  bins.resize(num_bin_row * num_bin_row);
-
-
+void create_bins(vector<vector<particle_t*>> &bins, particle_t* particles, int n, int & num_bin_row){
+  //size = sqrt(density * n)
+  //bin_length = 2*cutoff
+  //the number of bins in a row = size / binlength. Round up.
+  num_bin_row = ceil((sqrt(density * n)) / (2 * cutoff));
+  //resize the vector to the exact size of bins.
+  bins.resize(num_bin_row * num_bin_row);    
+  //put particles in bins according to their locations
+  for(int j = 0; j < n; j++){
+    int x = floor(particles[j].x/cutoff);
+    int y = floor(particles[j].y/cutoff);
+    bins[x + y * num_bin_row ].push_back(&particles[j]);
+  }
+  cout<<"create_bins"<<endl;
 }
 //
 //  benchmarking program
@@ -62,46 +63,43 @@ int main( int argc, char **argv )
     set_size( n );
     init_particles( n, particles );
     //create the bins to contain the particles
-    vector<vector<particle_t*> > bins;
+    vector<vector<particle_t*>> bins;
     int num_bin_row = 0;
-    create_bins(bins, particles, n, num_bin_row);
+    create_bins(&bins, particles, n, &num_bin_row);
     int num_bins = num_bin_row * num_bin_row;
-    cout<<"de1"<<endl;
+    cout<<"Bins Created"<<endl;
     //
     //  simulate a number of time steps
     //
-    double simulation_time = read_timer( );
+
+    double simulation_time = read_timer();
 
     for( int step = 0; step < NSTEPS; step++ )
     {
 	     navg = 0;
        davg = 0.0;
 	     dmin = 1.0;
-
-       //clean the bins first
-       cout<<"de2"<<endl;
-       for(int i = 0; i < num_bins; i++){
-         bins[i].clear();
-       }
-       cout<<"de3"<<endl;
-       //put particles in bins according to their locations
-       for(int j = 0; j < n;j++){
-         int x = floor(particles[j].x/cutoff);
-         int y = floor(particles[j].y/cutoff);
-         bins[x + num_bin_row * y].push_back(&particles[j]);
-       }
-       cout<<"de4"<<endl;
         //
         //  compute forces
         //
-        for( int i = 0; i < n; i++ )
+        //  Do one set of computations for each bin.
+        for( int i = 0; i < num_bins; i++ )
         {
-            particles[i].ax = particles[i].ay = 0;
-            cout<<"de44"<<endl;
+          vector<particle_t*> binQ = bins[i];
+          int particles_per_bin = binQ.size();
+            for( int j = 0; j < particles_per_bin; j++){
+              particles[i].ax = particles[i].ay = 0;
+            }
+            cout<<"Accelerations zeroed"<<endl;
 
-              int cx = floor(particles[i].x/cutoff);
-              int cy = floor(particles[i].y/cutoff);
-              int location = cx + num_bin_row * cy;
+              //Search within current bin and a 'halo region'
+              //Halo region may be defined as the region around the bin of size 'cutoff'
+              //For ease in computation, the neighboring bins may be used as the halo.
+
+              //int cx = floor(particles[i].x/cutoff);
+              //int cy = floor(particles[i].y/cutoff);
+              //int location = cx + num_bin_row * cy;
+              int location = i;
               vector<int> x_range;
               vector<int> y_range;
               // int startx = -1; // the begin row of bin
@@ -124,16 +122,19 @@ int main( int argc, char **argv )
                 x_range.push_back(1);
               }
                 cout<<"de66"<<endl;
-              for(int a = 0; a < x_range.size();a++){
+                //This should manage the ranges such that the halo region is searched.
+              for(int a = 0; a < x_range.size(); a++){
                 for(int b = 0; b< y_range.size(); b++){
                   cout<<"de67"<<endl;
-                  int bin_num = location + x_range[a] + num_bin_row*y_range[b];
+                  int bin_num = i + x_range[a] + num_bin_row*y_range[b];
                   cout<<bin_num<<endl;
                   cout<<"de68"<<endl;
-                  for(int c = 0; c < bins[location].size(); c++){
-                    cout<<"de69"<<endl;
-                    apply_force(particles[i], *bins[bin_num][c], &dmin, &davg, &navg);
-                    cout<<"de70"<<endl;
+                  for(int c = 0; c < bins[i].size(); c++){
+                    for(int d = 0; d < bins[bin_num].size(); d++){
+                      cout<<"de69"<<endl;
+                      apply_force(*bins[i][c], *bins[bin_num][d], &dmin, &davg, &navg);
+                      cout<<"de70"<<endl;
+                    }
                   }
                 }
               }
@@ -141,9 +142,11 @@ int main( int argc, char **argv )
         }
         //
         //  move particles
+        //  The particles must also be moved between bins as necessary.
         //
         cout<<"de3"<<endl;
         for( int p = 0; p < n; p++ )
+          //Insert logic here
             move( particles[p] );
         if( find_option( argc, argv, "-no" ) == -1 )
         {
