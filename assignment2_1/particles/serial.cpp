@@ -66,7 +66,7 @@ int main( int argc, char **argv )
     //create the bins to contain the particles
     vector<vector<particle_t*> > bins;
     int num_bin_row = 0;
-    create_bins(&bins, particles, n, &num_bin_row);
+    create_bins(bins, particles, n, num_bin_row);
     int num_bins = num_bin_row * num_bin_row;
     cout<<"Bins Created"<<endl;
     //
@@ -149,14 +149,14 @@ int main( int argc, char **argv )
         for( int b = 0; b < num_bins; b++ )
           {//Insert logic here
             for( int p = bins[b].size() - 1; p >= 0 ; p--){
-              move( bins[b][p] );
+              move( *bins[b][p] );
                         
               int x = floor(bins[b][p]->x/binsize);
               int y = floor(bins[b][p]->y/binsize);
               if(y * num_bin_row + x != b)
               {
                 bins[x + y * num_bin_row ].push_back(bins[b][p]);
-                bins[b].erase(bins[b].begin+p);
+                bins[b].erase(bins[b].begin()+p);
               }
             }
         }
