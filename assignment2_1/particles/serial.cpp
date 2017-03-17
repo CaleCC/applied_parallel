@@ -159,6 +159,7 @@ int main(int argc, char **argv)
 
 		for (int b = 0; b < num_bins; b++)
 		{//Insert logic here
+			int actualsize = bins[b].size();
 			for (int p = bins[b].size() - 1; p >= 0; p--) {
 				//printf("Moving particle in bin %d, p = %d\n", b, p);
 				move(*bins[b][p]);
@@ -171,8 +172,11 @@ int main(int argc, char **argv)
 					printf("Moving particles between bin %d and %d\n", x+y*num_bin_row, b);
 					temp_move.push_back(bins[b][p]);
 					bins[b].erase(bins[b].begin() + p);
+					actualsize--;
 				}
 			}
+			//This should be done with just the erase function, but it seems to be failing?
+			bins[b].resize(actualsize);
 		}
 		for(int i = 0; i < temp_move.size(); i++){
 			int x = floor(temp_move[i]->x / binsize);
