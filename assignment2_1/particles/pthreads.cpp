@@ -184,8 +184,10 @@ void *thread_routine( void *pthread_id )
 			int x = floor(temp_move[i]->x / binsize);
 			int y = floor(temp_move[i]->y / binsize);
 			//printf("Pushing particle into bin[%d]\n", x+y*num_bin_row);
-
-			bins[x + y * num_bin_row].push_back(temp_move[i]);
+			int index = x + y * num_bin_row;
+			pthread_mutex_lock(&mutex);
+			bins[index].push_back(temp_move[i]);
+			pthread_mutex_unlock(&mutex);
 			//printf("Pushback complete\n");
 		}
 		temp_move.clear();
