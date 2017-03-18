@@ -172,7 +172,7 @@ void *thread_routine( void *pthread_id )
 					//printf("p is %d\n", p);
 					//printf("Moving particles from bin %d to %d\n", b, x+y*num_bin_row);
 					temp_move.push_back(bins[b][p]);
-                    bins[b][p] = bins[--size];
+                    bins[b][p] = bins[b][--size];
                     //We move the last particle address into the current one, then reduce size by one.
 				}
 				else {
