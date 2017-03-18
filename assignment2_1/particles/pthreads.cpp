@@ -36,7 +36,7 @@ double gabsmin=1.0,gabsavg=0.0;
 //
 //create bins with length of cutoff
 //
-void create_bins(vector<vector<particle_t*> > &bins, particle_t* particles, int n, int & num_bin_row) {
+void create_bins() {
 	//size = sqrt(density * n)
 	double binsize = 2 * cutoff;
 	//the number of bins in a row = size / binlength. Round up.
@@ -117,7 +117,7 @@ void *thread_routine( void *pthread_id )
 			for (int a = 0; a < x_range.size(); a++) {
 				for (int b = 0; b < y_range.size(); b++) {
 					int bin_num = i + x_range[a] + num_bin_row*y_range[b];
-					printf("i: %d, bin_num: %d, bins[i].size(): %d, bins[bin_num].size(): %d\n",i, bin_num, bins[i].size(), bins[bin_num].size());
+					//printf("i: %d, bin_num: %d, bins[i].size(): %d, bins[bin_num].size(): %d\n",i, bin_num, bins[i].size(), bins[bin_num].size());
 
 					for (int c = 0; c < bins[i].size(); c++) {
 						for (int d = 0; d < bins[bin_num].size(); d++) {
@@ -153,14 +153,14 @@ void *thread_routine( void *pthread_id )
 		{
 			int size = bins[b].size();
 			for (int p = 0; p < size;) {
-				printf("Moving particle in bin %d, p = %d\n", b, p);
+				//printf("Moving particle in bin %d, p = %d\n", b, p);
 				move(*bins[b][p]);
 
 				int x = floor(bins[b][p]->x / binsize);
 				int y = floor(bins[b][p]->y / binsize);
 				if (y * num_bin_row + x != b)
 				{
-					printf("p is %d: Moving particles from bin %d to %d... \n", p, b, x+y*num_bin_row);
+					//printf("p is %d: Moving particles from bin %d to %d... \n", p, b, x+y*num_bin_row);
 					temp_move.push_back(bins[b][p]);
                     size--;
                     bins[b][p] = bins[b][size];
@@ -176,12 +176,12 @@ void *thread_routine( void *pthread_id )
 		for (int i = 0; i < tempsize; i++) {
 			int x = floor(temp_move[i]->x / binsize);
 			int y = floor(temp_move[i]->y / binsize);
-			printf("Pushing particle into bin[%d]... ", x+y*num_bin_row);
+			//printf("Pushing particle into bin[%d]... ", x+y*num_bin_row);
 			int index = x + y * num_bin_row;
 			pthread_mutex_lock(&mutex);
 			bins[index].push_back(temp_move[i]);
 			pthread_mutex_unlock(&mutex);
-			printf("Pushback complete\n");
+			//printf("Pushback complete\n");
 		}
 		temp_move.clear();
 		//printf("temp_move cleared\n");
@@ -250,7 +250,7 @@ int main( int argc, char **argv )
 
 	//create the bins to contain the particles
 	num_bin_row = 0;
-	create_bins(bins, particles, n, num_bin_row);
+	create_bins();
 	num_bins = num_bin_row * num_bin_row;
 
     pthread_attr_t attr;
