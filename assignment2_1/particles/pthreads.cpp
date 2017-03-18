@@ -119,9 +119,9 @@ void *thread_routine( void *pthread_id )
 					int bin_num = i + x_range[a] + num_bin_row*y_range[b];
 					//printf("i: %d, bin_num: %d, bins[i].size(): %d, bins[bin_num].size(): %d\n",i, bin_num, bins[i].size(), bins[bin_num].size());
 
-					for (int c = 0; c < bins[i].size(); c++) {
+					for (int c = 0; c < binQ.size(); c++) {
 						for (int d = 0; d < bins[bin_num].size(); d++) {
-							apply_force(*bins[i][c], *bins[bin_num][d], &dmin, &davg, &navg);
+							apply_force(*binQ[c], *bins[bin_num][d], &dmin, &davg, &navg);
 						}
 					}
 				}
@@ -172,6 +172,8 @@ void *thread_routine( void *pthread_id )
 			}
             bins[b].resize(size);
 		}
+        pthread_barrier_wait( &barrier );
+        
         int tempsize = temp_move.size();
 		for (int i = 0; i < tempsize; i++) {
 			int x = floor(temp_move[i]->x / binsize);
