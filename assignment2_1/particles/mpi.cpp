@@ -152,75 +152,21 @@ int main( int argc, char **argv )
             totalSize += partition_sizes[i];
         }
     }
-/*
-        int iter = 0;
-        partition_offsets[0] = 0;
 
-        int particle_per_proc= 0;
-        //Handle first processor seperately.
-        for( int j = 0; j < rows_per_proc; j++){
-            for(vector<particle_t*>::iterator begin = bins[i*rows_per_proc + j].begin();
-             iterator != bins[i*rows_per_proc + j].end(); ++iterator  ){
-                sendBuf[iter++] = *iterator;
-                particle_per_proc++;
-            }
-        }
-
-        partition_sizes[i] = particle_per_proc;
-        partition_offsets[i+1] = iter;
-
-
-        for( int i = 0; i < n_proc-1; i++){
-            particle_per_proc= 0;
-            for( int j = 0; j < rows_per_proc; j++){
-                for(vector<particle_t*>::iterator begin = bins[i*rows_per_proc + j].begin(); iterator != bins[i*rows_per_proc + j].end(); ++iterator  ){
-                    sendBuf[iter++] = *iterator;
-                    particle_per_proc++;
-                }
-            }
-            partition_sizes[i] = particle_per_proc;
-            partition_offsets[i+1] = iter;
-        }
-        //Handle last processor seperately.
-
-        int first = min(  n_proc    * rows_per_proc, num_bins);
-        int last  = min( (n_proc+1) * rows_per_proc, num_bins);
-
-        particle_per_proc= 0;
-        for( int j = first; j < last; j++){
-            for(vector<particle_t*>::iterator begin = bins[k].begin(); iterator != bins[k].end(); ++iterator  ){
-                sendBuf[iter++] = *iterator;
-                particle_per_proc++;
-            }
-        }
-
-        partition_sizes[n_proc-1] = particle_per_proc;
-        //partition_offsets[n_proc] = iter; //iter should be n.
-    }*/
         MPI_Scatter( partition_sizes, n_proc, MPI_INT, local_size, n_proc, MPI_INT, 0, MPI_COMM_WORLD );
         
         MPI_Scatter( partition_offsets, n_proc, MPI_INT, local_offset, n_proc, MPI_INT, 0, MPI_COMM_WORLD );
         //At this point, we expect every worker to have a complete set of knowledge regarding the sizes and offsets.
-/*
-    //
-    //  set up the data partitioning across processors
-    //
-    int particle_per_proc = (n + n_proc - 1) / n_proc;
-    int *partition_offsets = (int*) malloc( (n_proc+1) * sizeof(int) );
-    for( int i = 0; i < n_proc+1; i++ )
-        partition_offsets[i] = min( i * particle_per_proc, n );
-    
-    int *partition_sizes = (int*) malloc( n_proc * sizeof(int) );
-    for( int i = 0; i < n_proc; i++ )
-        partition_sizes[i] = partition_offsets[i+1] - partition_offsets[i];
-*/
+
     //
     //  allocate storage for local partition
     //
     int nlocal = local_size[rank];
     particle_t *local = (particle_t*) malloc( nlocal * sizeof(particle_t) );
-    particle_t *fromAbove = (particle_t*) malloc( n/2 * sizeof(particle_t) );
-    particle_t *fromBelow = (particle_t*) malloc( n/2 * sizeof(particle_t) );
+    particle_t *fromAbove = (particle_t*) malloc( n/n_proc * sizeof(particle_t) );
+    particle_t *fromBelow = (particle_t*) malloc( n/n_proc * sizeof(particle_t) );
+    particle_t* movingup = (particle_t*) malloc(sizeof(particle_t) * n/n_proc);
+    particle_t* movingdown = (particle_t*) malloc(sizeof(particle_t) * n/n_proc);
     //It is reasonable to assume that no more than half the total particles will travel between a local partition.
 
     
@@ -387,11 +333,11 @@ int main( int argc, char **argv )
         }
 
         if(rank > 0){
-            MPI_Recv(fromAbove, n/2, PARTICLE, rank+1, rank+1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(fromAbove, n/n_proc, PARTICLE, rank+1, rank+1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             MPI_Get_count(MPI_STATUS_IGNORE, PARTICLE, &fa);
         }
         if(rank < n_proc){
-            MPI_Recv(fromBelow, n/2, PARTICLE, rank-1, rank-1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(fromBelow, n/n_proc, PARTICLE, rank-1, rank-1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             MPI_Get_count(MPI_STATUS_IGNORE, PARTICLE, &fb);
         }
         //Now we wish to recieve the data of all processes which have moved particles into our system.
@@ -436,32 +382,38 @@ int main( int argc, char **argv )
         //Send the first REAL row to our neighbors.
         moveUp.clear();
         moveDown.clear();
+        int upsize = 0;
+        int downsize = 0;
         if(rank > 0){
             for(int eob = biter; eob < biter + num_bin_row; eob++){
-                for(int i = 0; i < localBins[eob].size(); i++)
-                    moveUp.push_back(localBins[eob][i]);
+                //for(int i = 0; i < localBins[eob].size(); i++)
+                //    moveUp.push_back(localBins[eob][i]);
+                upsize += localBins[eob].size();
+                memcpy(movingup, localBins[eob].data(), localBins[eob].size());
             }   
         }
         if(rank < n_proc){
             for(int boe = local_bin_size; boe < endBins; boe++){
-                for(int i = 0; i < localBins[boe].size(); i++)
-                    moveDown.push_back(localBins[boe][i]);
+                //for(int i = 0; i < localBins[boe].size(); i++)
+                //    moveDown.push_back(localBins[boe][i]);
+                downsize += localBins[boe].size();
+                memcpy(movingdown, localBins[boe].data(), localBins[boe].size());
             }   
         }
         //Same as above, we send data up and down
         if(rank > 0){
-            MPI_Send(moveUp.data(), moveUp.size(), PARTICLE, rank-1, rank, MPI_COMM_WORLD);
+            MPI_Send(movingup, upsize, PARTICLE, rank-1, rank, MPI_COMM_WORLD);
         }
         if(rank < n_proc){
-            MPI_Send(moveDown.data(), moveDown.size(), PARTICLE, rank+1, rank, MPI_COMM_WORLD);
+            MPI_Send(movingdown, downsize, PARTICLE, rank+1, rank, MPI_COMM_WORLD);
         }
 
         if(rank > 0){
-            MPI_Recv(fromAbove, n/2, PARTICLE, rank+1, rank+1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(fromAbove, n/n_proc, PARTICLE, rank+1, rank+1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             MPI_Get_count(MPI_STATUS_IGNORE, PARTICLE, &fa);
         }
         if(rank < n_proc){
-            MPI_Recv(fromBelow, n/2, PARTICLE, rank-1, rank-1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(fromBelow, n/n_proc, PARTICLE, rank-1, rank-1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             MPI_Get_count(MPI_STATUS_IGNORE, PARTICLE, &fb);
         }
         //We must now handle the data received differently though; we have to rebin it into our halo regions.
@@ -521,6 +473,9 @@ int main( int argc, char **argv )
     free( sendBuf );
     free( fromAbove );
     free( fromBelow );
+    free( movingup );
+    free( movingdown );
+
 
     if( fsave )
         fclose( fsave );
