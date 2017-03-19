@@ -6,6 +6,7 @@
 #include "common.h"
 #include <vector>
 #include <iostream>
+#include <string.h>
 
 #define density 0.0005
 #define mass    0.01
@@ -18,7 +19,7 @@ using namespace std;
 //
 //create bins with length of cutoff
 //
-void create_bins(vector<vector<particle_t*> > &bins, particle_t* particles, int n, int num_bin_row, int first) {
+void create_bins(vector<vector<particle_t> > &bins, particle_t* particles, int n, int num_bin_row, int first) {
 
     //put particles in bins according to their locations
     for (int j = 0; j < n; j++) {
@@ -28,7 +29,7 @@ void create_bins(vector<vector<particle_t*> > &bins, particle_t* particles, int 
     }
 }
 //Partition particles into n_proc bins based on their row location. 
-int* partition_bins(vector<vector<particle_t*> > &bins, particle_t* particles, int n, int num_bin_row, int n_proc) {
+int* partition_bins(vector<vector<particle_t> > &bins, particle_t* particles, int n, int num_bin_row, int n_proc) {
     int* particles_per_process = (int*) malloc(sizeof(int)*n_proc);
     memset ( particles_per_process, 0, sizeof(int)*n_proc);
 
@@ -133,7 +134,7 @@ int main( int argc, char **argv )
         //partition_bins will sort the particles into n_proc bins, based on their bin row index
         //While we do this, we want to also count the number of particles in each level;
         //We use this info to malloc a particle_t array to scatterv across all processes.
-        partition_sizes = partition_bins(bins, particles, sendBuf, n, num_bin_row, n_proc);
+        partition_sizes = partition_bins(bins, particles, n, num_bin_row, n_proc);
         partition_offsets = (int*) malloc(sizeof(int) * n_proc+1);
         int totalSize = 0;
         partition_offsets[0] = 0;
@@ -146,7 +147,7 @@ int main( int argc, char **argv )
         totalSize = 0;
         //This loop is meant to fill sendBuf with contiguous particles.
         for( int i = 0; i < n_proc; i++){
-            memcpy(&sendBuf[totalSize], buf[i].data(), partition_sizes[i]);
+            memcpy(&sendBuf[totalSize], bins[i].data(), partition_sizes[i]);
             totalSize += partition_sizes[i];
         }
     }
@@ -280,7 +281,7 @@ int main( int argc, char **argv )
         //  Do one set of computations for each bin.
         for (; biter < endBins; biter++)
         {
-            vector<particle_t*> binQ = localBins[biter];
+            vector<particle_t> binQ = localBins[biter];
             int particles_per_bin = binQ.size();
 
             for (int j = 0; j < particles_per_bin; j++) {
