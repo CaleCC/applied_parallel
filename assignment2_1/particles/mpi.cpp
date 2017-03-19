@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <math.h>
 #include "common.h"
 #include <vector>
 #include <iostream>
@@ -11,6 +12,7 @@
 #define cutoff  0.01
 #define min_r   (cutoff/100)
 #define dt      0.0005
+#define binsize cutoff*2
 
 using namespace std;
 //
@@ -117,7 +119,6 @@ int main( int argc, char **argv )
 
     int num_bin_row;
     //size = sqrt(density * n)
-    double binsize = 2 * cutoff;
     //the number of bins in a row = size / binlength. Round up.
     double size = sqrt(density * n); //This is from common.cpp
     num_bin_row = ceil(size / binsize);
