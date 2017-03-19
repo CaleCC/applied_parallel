@@ -245,6 +245,5 @@ int main(int argc, char **argv)
 	free(particles);
 	if (fsave)
 		fclose(fsave);
-	scanf("Press any key to return\n");
 	return 0;
 }
