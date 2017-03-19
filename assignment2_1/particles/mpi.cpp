@@ -13,7 +13,7 @@
 #define cutoff  0.01
 #define min_r   (cutoff/100)
 #define dt      0.0005
-#define binsize cutoff*2
+#define binsize (cutoff*2)
 
 using namespace std;
 //
@@ -73,6 +73,7 @@ int main( int argc, char **argv )
     int* local_offset;
     int* partition_sizes;
     int* partition_offsets;
+    particle_t *sendBuf;
  
     //
     //  process command line parameters
@@ -143,7 +144,7 @@ int main( int argc, char **argv )
             partition_offsets[i+1] = partition_offsets[i] + partition_sizes[i]; 
         }
         //Initialize the large array of particles we will be sending
-        particle_t *sendBuf = (particle_t*) malloc( totalSize * sizeof(particle_t) );
+        sendBuf = (particle_t*) malloc( totalSize * sizeof(particle_t) );
         totalSize = 0;
         //This loop is meant to fill sendBuf with contiguous particles.
         for( int i = 0; i < n_proc; i++){
@@ -228,8 +229,8 @@ int main( int argc, char **argv )
     //
     //  Create bins for local rows.
     //
-    first = min(  rank    * rows_per_proc, num_bin_row);
-    last  = min( (rank+1) * rows_per_proc, num_bin_row);
+    int first = min(  rank    * rows_per_proc, num_bin_row);
+    int last  = min( (rank+1) * rows_per_proc, num_bin_row);
     int bins_proc = last - first +2; //General case
 
     if(rank == 0 || rank == n_proc){
@@ -240,7 +241,7 @@ int main( int argc, char **argv )
     int local_bin_size = bins_proc * num_bin_row;
     localBins.resize(local_bin_size); //Bins per row * number of rows.
 
-    create_bins(localBins, local, nlocal, num_bin_row, first, last);
+    create_bins(localBins, local, nlocal, num_bin_row, first);
 
     //
     //  simulate a number of time steps
@@ -347,7 +348,6 @@ int main( int argc, char **argv )
         //  must now be sent to the relevant folks.
         vector<particle_t> moveUp;
         vector<particle_t> moveDown;
-        double binsize = cutoff * 2;
         biter = num_bin_row;
         if(rank == 0){
             biter = 0;
@@ -359,10 +359,10 @@ int main( int argc, char **argv )
             int size = localBins[biter].size();
             for (int p = 0; p < size;) {
                 //printf("Moving particle in bin %d, p = %d\n", biter, p);
-                move(*localBins[biter][p]);
+                move(localBins[biter][p]);
 
-                int x = floor(localBins[biter][p]->x / binsize);
-                int y = floor(localBins[biter][p]->y / binsize);
+                int x = floor(localBins[biter][p].x / binsize);
+                int y = floor(localBins[biter][p].y / binsize);
                 if (y * num_bin_row + x != biter)
                 {
                     if(biter < num_bin_row)
@@ -382,7 +382,7 @@ int main( int argc, char **argv )
         if(rank > 0){
             MPI_Send(moveUp.data(), moveUp.size(), PARTICLE, rank-1, rank, MPI_COMM_WORLD);
         }
-        if(rank < num_proc){
+        if(rank < n_proc){
             MPI_Send(moveDown.data(), moveDown.size(), PARTICLE, rank+1, rank, MPI_COMM_WORLD);
         }
 
@@ -390,7 +390,7 @@ int main( int argc, char **argv )
             MPI_Recv(fromAbove, n/2, PARTICLE, rank+1, rank+1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             MPI_Get_count(MPI_STATUS_IGNORE, PARTICLE, &fa);
         }
-        if(rank < num_proc){
+        if(rank < n_proc){
             MPI_Recv(fromBelow, n/2, PARTICLE, rank-1, rank-1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             MPI_Get_count(MPI_STATUS_IGNORE, PARTICLE, &fb);
         }
