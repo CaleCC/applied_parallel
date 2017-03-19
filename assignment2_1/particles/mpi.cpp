@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include "common.h"
+#include <vector>
+#include <iostream>
 
 #define density 0.0005
 #define mass    0.01
