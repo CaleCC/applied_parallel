@@ -452,7 +452,7 @@ int main( int argc, char **argv )
         if(rank > 0){
             MPI_Send(moveUp.data(), moveUp.size(), PARTICLE, rank-1, rank, MPI_COMM_WORLD);
         }
-        if(rank < num_proc){
+        if(rank < n_proc){
             MPI_Send(moveDown.data(), moveDown.size(), PARTICLE, rank+1, rank, MPI_COMM_WORLD);
         }
 
@@ -460,7 +460,7 @@ int main( int argc, char **argv )
             MPI_Recv(fromAbove, n/2, PARTICLE, rank+1, rank+1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             MPI_Get_count(MPI_STATUS_IGNORE, PARTICLE, &fa);
         }
-        if(rank < num_proc){
+        if(rank < n_proc){
             MPI_Recv(fromBelow, n/2, PARTICLE, rank-1, rank-1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             MPI_Get_count(MPI_STATUS_IGNORE, PARTICLE, &fb);
         }
@@ -471,7 +471,7 @@ int main( int argc, char **argv )
                 int y = floor(fromAbove[j].y / binsize);
                 localBins[x + (y-first) * num_bin_row].push_back(fromAbove[j]);
             }
-        if(rank < num_proc)
+        if(rank < n_proc)
             for (int j = 0; j < fb; j++) {
                 int x = floor(fromBelow[j].x / binsize);
                 int y = floor(fromBelow[j].y / binsize);
