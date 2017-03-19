@@ -4,6 +4,57 @@
 #include <assert.h>
 #include "common.h"
 
+#define density 0.0005
+#define mass    0.01
+#define cutoff  0.01
+#define min_r   (cutoff/100)
+#define dt      0.0005
+
+using namespace std;
+//
+//create bins with length of cutoff
+//
+void create_bins(vector<vector<particle_t*> > &bins, particle_t* particles, int n, int num_bin_row, int first) {
+
+    //put particles in bins according to their locations
+    for (int j = 0; j < n; j++) {
+        int x = floor(particles[j].x / binsize);
+        int y = floor(particles[j].y / binsize);
+        bins[x + (y-first) * num_bin_row].push_back(particles[j]);
+    }
+}
+//Partition particles into n_proc bins based on their row location. 
+int* partition_bins(vector<vector<particle_t*> > &bins, particle_t* particles, int n, int num_bin_row, int n_proc) {
+    int* particles_per_process = (int*) malloc(sizeof(int)*n_proc);
+    memset ( particles_per_process, 0, sizeof(int)*n_proc);
+
+    int num_bins = num_bin_row * num_bin_row;
+    int rows_per_proc = (num_bin_row + n_proc -1) / n_proc;
+    bins.resize(n_proc);
+    //put particles in bins according to their locations
+    for (int j = 0; j < n; j++) {
+        //int x = floor(particles[j].x / binsize);
+        int y = floor(particles[j].y / binsize);
+        //int bindex = x + y * num_bin_row;
+        int procdex = floor(y / rows_per_proc);
+        bins[procdex].push_back(particles[j]);
+        particles_per_process[procdex]++;
+        //If this particle is in a halo bin, we must also import it twice.
+        int boundcheck = y % rows_per_proc;
+        if(boundcheck == 0 && y != 0){
+            //We now know that y is on a boundary, and must be included in procdex+1.
+            bins[procdex+1].push_back(particles[j]);
+            particles_per_process[procdex+1]++;
+        }
+        else if(boundcheck == rows_per_proc-1 && y != num_bin_row){
+            //We now know that y is on a boundary, and must be included in procdex-1.
+            bins[procdex-1].push_back(particles[j]);
+            particles_per_process[procdex-1]++;
+        }
+    }
+    return particles_per_process;
+}
+
 //
 //  benchmarking program
 //
@@ -13,6 +64,10 @@ int main( int argc, char **argv )
     double dmin, absmin=1.0,davg,absavg=0.0;
     double rdavg,rdmin;
     int rnavg; 
+    int* local_size;
+    int* local_offset;
+    int* partition_sizes;
+    int* partition_offsets;
  
     //
     //  process command line parameters
@@ -46,13 +101,102 @@ int main( int argc, char **argv )
     FILE *fsave = savename && rank == 0 ? fopen( savename, "w" ) : NULL;
     FILE *fsum = sumname && rank == 0 ? fopen ( sumname, "a" ) : NULL;
 
-
     particle_t *particles = (particle_t*) malloc( n * sizeof(particle_t) );
+
+    local_size = (int*)malloc(sizeof(int)*n_proc);
+    local_offset = (int*)malloc(sizeof(int)*n_proc);
+
+    vector<vector<particle_t> > bins;
     
     MPI_Datatype PARTICLE;
     MPI_Type_contiguous( 6, MPI_DOUBLE, &PARTICLE );
     MPI_Type_commit( &PARTICLE );
-    
+
+
+    int num_bin_row;
+    //size = sqrt(density * n)
+    double binsize = 2 * cutoff;
+    //the number of bins in a row = size / binlength. Round up.
+    double size = sqrt(density * n); //This is from common.cpp
+    num_bin_row = ceil(size / binsize);
+    int num_bins = num_bin_row * num_bin_row;
+    int rows_per_proc = (num_bin_row + n_proc -1) / n_proc;
+    //
+    //  initialize and distribute the particles (that's fine to leave it unoptimized)
+    //
+    set_size( n );
+    if( rank == 0 ){
+        init_particles( n, particles );
+        //partition_bins will sort the particles into n_proc bins, based on their bin row index
+        //While we do this, we want to also count the number of particles in each level;
+        //We use this info to malloc a particle_t array to scatterv across all processes.
+        partition_sizes = partition_bins(bins, particles, sendBuf, n, num_bin_row, n_proc);
+        partition_offsets = (int*) malloc(sizeof(int) * n_proc+1);
+        int totalSize = 0;
+        partition_offsets[0] = 0;
+        for (int i = 0; i < n_proc; i++){
+            totalSize += partition_sizes[i];
+            partition_offsets[i+1] = partition_offsets[i] + partition_sizes[i]; 
+        }
+        //Initialize the large array of particles we will be sending
+        particle_t *sendBuf = (particle_t*) malloc( totalSize * sizeof(particle_t) );
+        totalSize = 0;
+        //This loop is meant to fill sendBuf with contiguous particles.
+        for( int i = 0; i < n_proc; i++){
+            memcpy(&sendBuf[totalSize], buf[i].data(), partition_sizes[i]);
+            totalSize += partition_sizes[i];
+        }
+    }
+/*
+        int iter = 0;
+        partition_offsets[0] = 0;
+
+        int particle_per_proc= 0;
+        //Handle first processor seperately.
+        for( int j = 0; j < rows_per_proc; j++){
+            for(vector<particle_t*>::iterator begin = bins[i*rows_per_proc + j].begin();
+             iterator != bins[i*rows_per_proc + j].end(); ++iterator  ){
+                sendBuf[iter++] = *iterator;
+                particle_per_proc++;
+            }
+        }
+
+        partition_sizes[i] = particle_per_proc;
+        partition_offsets[i+1] = iter;
+
+
+        for( int i = 0; i < n_proc-1; i++){
+            particle_per_proc= 0;
+            for( int j = 0; j < rows_per_proc; j++){
+                for(vector<particle_t*>::iterator begin = bins[i*rows_per_proc + j].begin(); iterator != bins[i*rows_per_proc + j].end(); ++iterator  ){
+                    sendBuf[iter++] = *iterator;
+                    particle_per_proc++;
+                }
+            }
+            partition_sizes[i] = particle_per_proc;
+            partition_offsets[i+1] = iter;
+        }
+        //Handle last processor seperately.
+
+        int first = min(  n_proc    * rows_per_proc, num_bins);
+        int last  = min( (n_proc+1) * rows_per_proc, num_bins);
+
+        particle_per_proc= 0;
+        for( int j = first; j < last; j++){
+            for(vector<particle_t*>::iterator begin = bins[k].begin(); iterator != bins[k].end(); ++iterator  ){
+                sendBuf[iter++] = *iterator;
+                particle_per_proc++;
+            }
+        }
+
+        partition_sizes[n_proc-1] = particle_per_proc;
+        //partition_offsets[n_proc] = iter; //iter should be n.
+    }*/
+        MPI_Scatter( partition_sizes, n_proc, MPI_INT, local_size, n_proc, MPI_INT, 0, MPI_COMM_WORLD );
+        
+        MPI_Scatter( partition_offsets, n_proc, MPI_INT, local_offset, n_proc, MPI_INT, 0, MPI_COMM_WORLD );
+        //At this point, we expect every worker to have a complete set of knowledge regarding the sizes and offsets.
+/*
     //
     //  set up the data partitioning across processors
     //
@@ -64,21 +208,36 @@ int main( int argc, char **argv )
     int *partition_sizes = (int*) malloc( n_proc * sizeof(int) );
     for( int i = 0; i < n_proc; i++ )
         partition_sizes[i] = partition_offsets[i+1] - partition_offsets[i];
-    
+*/
     //
     //  allocate storage for local partition
     //
-    int nlocal = partition_sizes[rank];
+    int nlocal = local_size[rank];
     particle_t *local = (particle_t*) malloc( nlocal * sizeof(particle_t) );
+    particle_t *fromAbove = (particle_t*) malloc( n/2 * sizeof(particle_t) );
+    particle_t *fromBelow = (particle_t*) malloc( n/2 * sizeof(particle_t) );
+    //It is reasonable to assume that no more than half the total particles will travel between a local partition.
+
     
+    MPI_Scatterv( particles, local_size, local_offset, PARTICLE, local, nlocal, PARTICLE, 0, MPI_COMM_WORLD );
+
     //
-    //  initialize and distribute the particles (that's fine to leave it unoptimized)
+    //  Create bins for local rows.
     //
-    set_size( n );
-    if( rank == 0 )
-        init_particles( n, particles );
-    MPI_Scatterv( particles, partition_sizes, partition_offsets, PARTICLE, local, nlocal, PARTICLE, 0, MPI_COMM_WORLD );
-    
+    first = min(  rank    * rows_per_proc, num_bin_row);
+    last  = min( (rank+1) * rows_per_proc, num_bin_row);
+    int bins_proc = last - first +2; //General case
+
+    if(rank == 0 || rank == n_proc){
+        bins_proc--; //On the top and bottom, we will have one less row (smaller halo)
+    }
+
+    vector<vector<particle_t> > localBins;
+    int local_bin_size = bins_proc * num_bin_row;
+    localBins.resize(local_bin_size); //Bins per row * number of rows.
+
+    create_bins(localBins, local, nlocal, num_bin_row, first, last);
+
     //
     //  simulate a number of time steps
     //
@@ -91,8 +250,11 @@ int main( int argc, char **argv )
         // 
         //  collect all global data locally (not good idea to do)
         //
-        MPI_Allgatherv( local, nlocal, PARTICLE, particles, partition_sizes, partition_offsets, PARTICLE, MPI_COMM_WORLD );
-        
+        //MPI_Allgatherv( local, nlocal, PARTICLE, particles, partition_sizes, partition_offsets, PARTICLE, MPI_COMM_WORLD );
+        //Rather than updating our local copy by collecting global data, we will send and recv 
+        //any and all updates of particles entering or exiting our area, halo region included.
+        //We will do this at the end of each time step, as we initialize our data proper.
+
         //
         //  save current step if necessary (slightly different semantics than in other codes)
         //
@@ -103,11 +265,55 @@ int main( int argc, char **argv )
         //
         //  compute all forces
         //
-        for( int i = 0; i < nlocal; i++ )
+        //We must account for halo regions- we do not want to calculate forces for the halo rows.
+        //These will generally be 0 to num_bin_row and local_bin_size+num_bin_row to local_bin_size+2*num_bin_row
+        //, except for the 0 rank worker process and n_proc rank process. We only must adjust for the starting value.
+
+        int biter = num_bin_row;
+        if(rank == 0){
+            biter = 0;
+        }
+        int endBins = local_bin_size+biter;
+        //  Do one set of computations for each bin.
+        for (; biter < endBins; biter++)
         {
-            local[i].ax = local[i].ay = 0;
-            for (int j = 0; j < n; j++ )
-                apply_force( local[i], particles[j], &dmin, &davg, &navg );
+            vector<particle_t*> binQ = localBins[biter];
+            int particles_per_bin = binQ.size();
+
+            for (int j = 0; j < particles_per_bin; j++) {
+                particles[biter].ax = particles[biter].ay = 0;
+            }
+            int location = biter;
+            vector<int> x_range;
+            vector<int> y_range;
+            x_range.push_back(0);
+            y_range.push_back(0);
+            if (location >= num_bin_row) {
+                y_range.push_back(-1);
+            }
+            if (location < num_bin_row*(num_bin_row - 1)) {
+                y_range.push_back(1);
+            }
+            if (location % num_bin_row != 0) {
+                x_range.push_back(-1);
+            }
+            if (location % num_bin_row != num_bin_row - 1) {
+                x_range.push_back(1);
+            }
+            //printf("x and y ranges initialized.\n");
+            //This should manage the ranges such that the halo region is searched.
+            for (int a = 0; a < x_range.size(); a++) {
+                for (int b = 0; b < y_range.size(); b++) {
+                    int bin_num = biter + x_range[a] + num_bin_row*y_range[b];
+                    //printf("i: %d, bin_num: %d, bins[i].size(): %d, bins[bin_num].size(): %d\n",i, bin_num, bins[i].size(), bins[bin_num].size());
+
+                    for (int c = 0; c < binQ.size(); c++) {
+                        for (int d = 0; d < localBins[bin_num].size(); d++) {
+                            apply_force(binQ[c], localBins[bin_num][d], &dmin, &davg, &navg);
+                        }
+                    }
+                }
+            }
         }
      
         if( find_option( argc, argv, "-no" ) == -1 )
@@ -133,8 +339,141 @@ int main( int argc, char **argv )
         //
         //  move particles
         //
-        for( int i = 0; i < nlocal; i++ )
-            move( local[i] );
+        //  We must first move particles as per usual, except our temp array of particles to exit our system
+        //  must now be sent to the relevant folks.
+        vector<particle_t> moveUp;
+        vector<particle_t> moveDown;
+        double binsize = cutoff * 2;
+        biter = num_bin_row;
+        if(rank == 0){
+            biter = 0;
+        }
+        endBins = local_bin_size+biter;
+
+        for (;biter < endBins; biter++)
+        {//Insert logic here
+            int size = localBins[biter].size();
+            for (int p = 0; p < size;) {
+                //printf("Moving particle in bin %d, p = %d\n", biter, p);
+                move(*localBins[biter][p]);
+
+                int x = floor(localBins[biter][p]->x / binsize);
+                int y = floor(localBins[biter][p]->y / binsize);
+                if (y * num_bin_row + x != biter)
+                {
+                    if(biter < num_bin_row)
+                        moveUp.push_back(localBins[biter][p]);
+                    else 
+                        moveDown.push_back(localBins[biter][p]);
+
+                    localBins[biter].erase(localBins[biter].begin() + p);
+                    size--;
+                }
+                else{
+                    p++;
+                }
+            }
+        }
+        int fa, fb;
+        if(rank > 0){
+            MPI_Send(moveUp.data(), moveUp.size(), PARTICLE, rank-1, rank, MPI_COMM_WORLD);
+        }
+        if(rank < num_proc){
+            MPI_Send(moveDown.data(), moveDown.size(), PARTICLE, rank+1, rank, MPI_COMM_WORLD);
+        }
+
+        if(rank > 0){
+            MPI_Recv(fromAbove, n/2, PARTICLE, rank+1, rank+1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Get_count(MPI_STATUS_IGNORE, PARTICLE, &fa);
+        }
+        if(rank < num_proc){
+            MPI_Recv(fromBelow, n/2, PARTICLE, rank-1, rank-1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Get_count(MPI_STATUS_IGNORE, PARTICLE, &fb);
+        }
+        //Now we wish to recieve the data of all processes which have moved particles into our system.
+        //We also wish to send the data of particles which have exited our system to our neighboring processes.
+
+        for(int i = 0; i < fa; i++){
+            int x = floor(fromAbove[i].x / binsize);
+            int y = floor(fromAbove[i].y / binsize);
+            localBins[x + (y-first) * num_bin_row].push_back(fromAbove[i]);
+        }
+        for(int i = 0; i < fb; i++){
+            int x = floor(fromBelow[i].x / binsize);
+            int y = floor(fromBelow[i].y / binsize);
+            localBins[x + (y-first) * num_bin_row].push_back(fromBelow[i]);
+        }
+
+
+//                                                                      //
+        ///                                                     ///
+        ///     We must also update the halo region for each.   ///
+        ///                                                     ///
+//                                                                      //
+
+//We accomplish this by clearing our topmost and bottommost bins, 
+//With the exception of the rank 0 and rank n_proc processes, handle those with care,
+//And then sending the second topmost and second bottommost bin rows to our neighbors
+//And then receiving the updated halo regions.
+
+        biter = num_bin_row;
+        if(rank == 0){
+            biter = 0;
+        }
+        endBins = local_bin_size+biter;
+
+        for(int i = 0; i < biter; i++){
+            localBins[i].clear();
+        }
+        for(int i = endBins; i < last*num_bin_row; i++){
+            localBins[i].clear();
+        }
+
+        //Send the first REAL row to our neighbors.
+        moveUp.clear();
+        moveDown.clear();
+        if(rank > 0){
+            for(int eob = biter; eob < biter + num_bin_row; eob++){
+                for(int i = 0; i < localBins[eob].size(); i++)
+                    moveUp.push_back(localBins[eob][i]);
+            }   
+        }
+        if(rank < n_proc){
+            for(int boe = local_bin_size; boe < endBins; boe++){
+                for(int i = 0; i < localBins[boe].size(); i++)
+                    moveDown.push_back(localBins[boe][i]);
+            }   
+        }
+        //Same as above, we send data up and down
+        if(rank > 0){
+            MPI_Send(moveUp.data(), moveUp.size(), PARTICLE, rank-1, rank, MPI_COMM_WORLD);
+        }
+        if(rank < num_proc){
+            MPI_Send(moveDown.data(), moveDown.size(), PARTICLE, rank+1, rank, MPI_COMM_WORLD);
+        }
+
+        if(rank > 0){
+            MPI_Recv(fromAbove, n/2, PARTICLE, rank+1, rank+1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Get_count(MPI_STATUS_IGNORE, PARTICLE, &fa);
+        }
+        if(rank < num_proc){
+            MPI_Recv(fromBelow, n/2, PARTICLE, rank-1, rank-1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Get_count(MPI_STATUS_IGNORE, PARTICLE, &fb);
+        }
+        //We must now handle the data received differently though; we have to rebin it into our halo regions.
+        if(rank > 0)
+            for (int j = 0; j < fa; j++) {
+                int x = floor(fromAbove[j].x / binsize);
+                int y = floor(fromAbove[j].y / binsize);
+                localBins[x + (y-first) * num_bin_row].push_back(fromAbove[j]);
+            }
+        if(rank < num_proc)
+            for (int j = 0; j < fb; j++) {
+                int x = floor(fromBelow[j].x / binsize);
+                int y = floor(fromBelow[j].y / binsize);
+                localBins[x + (y-first) * num_bin_row].push_back(fromBelow[j]);
+            }
+//End of time step.
     }
     simulation_time = read_timer( ) - simulation_time;
   
@@ -173,6 +512,12 @@ int main( int argc, char **argv )
     free( partition_sizes );
     free( local );
     free( particles );
+    free( local_size );
+    free( local_offset );
+    free( sendBuf );
+    free( fromAbove );
+    free( fromBelow );
+
     if( fsave )
         fclose( fsave );
     
