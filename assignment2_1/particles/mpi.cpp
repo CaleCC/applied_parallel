@@ -388,16 +388,16 @@ int main( int argc, char **argv )
             for(int eob = biter; eob < biter + num_bin_row; eob++){
                 //for(int i = 0; i < localBins[eob].size(); i++)
                 //    moveUp.push_back(localBins[eob][i]);
+                memcpy(&movingup[upsize], localBins[eob].data(), localBins[eob].size());
                 upsize += localBins[eob].size();
-                memcpy(movingup, localBins[eob].data(), localBins[eob].size());
             }   
         }
         if(rank < n_proc){
             for(int boe = local_bin_size; boe < endBins; boe++){
                 //for(int i = 0; i < localBins[boe].size(); i++)
                 //    moveDown.push_back(localBins[boe][i]);
+                memcpy(&movingdown[downsize], localBins[boe].data(), localBins[boe].size());
                 downsize += localBins[boe].size();
-                memcpy(movingdown, localBins[boe].data(), localBins[boe].size());
             }   
         }
         //Same as above, we send data up and down
