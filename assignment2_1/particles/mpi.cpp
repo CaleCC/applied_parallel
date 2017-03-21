@@ -407,6 +407,7 @@ int main( int argc, char **argv )
 
 			 //wait for receive of those numbers
 			 if(halo_left){
+				 if(rank == 1) printf("proc %d wait left wrong? \n",rank);
 				 MPI_Wait(&rec_req_l,&r_st_l);
 					printf( "after move proc %d   receive count from left %d\n",rank,rec_l_count);
 			 }
