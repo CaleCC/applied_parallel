@@ -202,28 +202,33 @@ int main( int argc, char **argv )
         for(int i = 0; i < bin_num; i++){
           bins[i].clear();
         }
-
+				printf( "cleared the bins\n");
         for(int i = 0; i < nlocal;i++){
           int partic_loc = bin_loc(local[i], proc_bin_width,bin_size,off_set_x-halo_left*bin_size,off_set_y);
           bins[partic_loc].push_back(local+i);
         }
+				printf( "push particle into bins\n");
         send_l_count = 0;
         send_r_count = 0;
 
         for(int i = 0; i < p_bin_num_y; i++){
           if(halo_left){
-            for(int j = 0; j < bins[halo_left + i*(proc_bin_width)].size();j++){
-                send_l[send_l_count] = *bins[halo_left+i*(proc_bin_width)][j];
+						int bin_left_most = halo_left+i*(proc_bin_width);
+						if(rank == 0) printf( "proc %d left bin location %d\n",rank,bin_left_most);
+            for(int j = 0; j < bins[bin_left_most].size();j++){
+                send_l[send_l_count] = *bins[bin_left_most][j];
                 send_l_count++;
             }
           }//if halo left exist
+					//printf( "send_l_cout %d\n",send_l_cout);
           if(halo_right){//if halo right exists
-            for(int j = 0; j <bins[p_bin_num_x - 1+halo_left+i*(proc_bin_width)].size(); j++){
-              send_r[send_r_count] = *bins[p_bin_num_x-1+halo_left+ i*(proc_bin_width)][j];
+						int bin_right_most = p_bin_num_x - 1+halo_left+i*(proc_bin_width);
+						if(rank == 0) printf( "proc %d right bin location %d\n",rank,bin_right_most);
+            for(int j = 0; j <bins[bin_right_most].size(); j++){
+              send_r[send_r_count] = *bins[bin_right_most][j];
               send_r_count++;
             }
           }
-
         }
 				printf( "proc %d start receive\n",rank);
         //receive the number of particle from neighbour
