@@ -27,6 +27,7 @@ void create_bins(vector<vector<particle_t> > &bins, particle_t* particles, int n
         int y = floor(particles[j].y / binsize);
         bins[x + (y-first) * num_bin_row].push_back(particles[j]);
     }
+    printf("from %d, Bins created\n", first);
 }
 //Partition particles into n_proc bins based on their row location. 
 int* partition_bins(vector<vector<particle_t> > &bins, particle_t* particles, int n, int num_bin_row, int n_proc) {
@@ -151,13 +152,14 @@ int main( int argc, char **argv )
             memcpy(&sendBuf[totalSize], bins[i].data(), partition_sizes[i]);
             totalSize += partition_sizes[i];
         }
+        printf("Particles and send buffer initialized\n");
     }
 
         MPI_Scatter( partition_sizes, n_proc, MPI_INT, local_size, n_proc, MPI_INT, 0, MPI_COMM_WORLD );
-        
+        printf("rank %d: partition sizes initialized\n",rank);
         MPI_Scatter( partition_offsets, n_proc, MPI_INT, local_offset, n_proc, MPI_INT, 0, MPI_COMM_WORLD );
         //At this point, we expect every worker to have a complete set of knowledge regarding the sizes and offsets.
-
+        printf("rank %d: partition offsets initialized\n",rank);
     //
     //  allocate storage for local partition
     //
@@ -171,7 +173,7 @@ int main( int argc, char **argv )
 
     
     MPI_Scatterv( particles, local_size, local_offset, PARTICLE, local, nlocal, PARTICLE, 0, MPI_COMM_WORLD );
-
+    printf("rank %d: particles scattered\n",rank);
     //
     //  Create bins for local rows.
     //
@@ -195,6 +197,7 @@ int main( int argc, char **argv )
     double simulation_time = read_timer( );
     for( int step = 0; step < NSTEPS; step++ )
     {
+        printf("Timestep: %d\n", step);
         navg = 0;
         dmin = 1.0;
         davg = 0.0;
