@@ -2,7 +2,7 @@
 #SBATCH -A TG-CCR140008 # 2017 XSEDE Applications of Parallel Computing Course Allocation
 #SBATCH -J particle-mpi16
 #SBATCH -o particle-mpi16.stdout.%j
-#SBATCH -N 16 -n 16
+#SBATCH -N 3 -n 3
 #SBATCH -p normal
 #SBATCH -t 00:10:00
-ibrun ./mpi -n 1000 -o mpi.txt
+ibrun ./mpi -n 1000 -o mpi66.txt
