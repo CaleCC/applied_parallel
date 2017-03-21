@@ -164,7 +164,7 @@ int main( int argc, char **argv )
     //It is reasonable to assume that no more than half the total particles will travel between a local partition.
 
     
-    MPI_Scatterv( particles, partition_sizes, partition_offsets, PARTICLE, local, nlocal, PARTICLE, 0, MPI_COMM_WORLD );
+    MPI_Scatterv( sendBuf, partition_sizes, partition_offsets, PARTICLE, local, nlocal, PARTICLE, 0, MPI_COMM_WORLD );
     printf("rank %d: particles scattered\n",rank);
     //
     //  Create bins for local rows.
