@@ -105,7 +105,6 @@ int main( int argc, char **argv )
     particle_t *particles = (particle_t*) malloc( n * sizeof(particle_t) );
     partition_offsets = (int*) malloc(sizeof(int) * n_proc);
     partition_sizes = (int*) malloc(sizeof(int)*n_proc);
-    particle_t* zippy = (particle_t*)malloc(sizeof(particle_t) * n) ;
 
     vector<particle_t> bins[n_proc];
     
@@ -170,6 +169,8 @@ int main( int argc, char **argv )
     //
     //  Create bins for local rows.
     //
+
+    particle_t* zippy = (particle_t*)malloc(sizeof(particle_t) * partition_offsets[n_proc]) ;
     int first = min(  rank    * rows_per_proc, num_bin_row);
     int last  = min( (rank+1) * rows_per_proc, num_bin_row);
     first--;
