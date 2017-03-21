@@ -170,8 +170,10 @@ int main( int argc, char **argv )
     int first = min(  rank    * rows_per_proc, num_bin_row);
     int last  = min( (rank+1) * rows_per_proc, num_bin_row);
     first--;
+    int last_real_bin = last-first;
     last++;
     if(rank == 0){
+        last_real_bin--;
         first++; //On the top and bottom, we will have one less row (smaller halo)
     }
     else if(rank == n_proc){
@@ -180,6 +182,7 @@ int main( int argc, char **argv )
     int bins_proc = last - first; //General case
 
     int local_bin_size = bins_proc * num_bin_row;
+    last_real_bin = last_real_bin * num_bin_row;
 
     vector<particle_t> localBins[local_bin_size];
     //vector<particle_t> throwaway;
@@ -224,9 +227,8 @@ int main( int argc, char **argv )
         if(rank == 0){
             biter = 0;
         }
-        int endBins = local_bin_size-biter; //Localbinsize includes the halo region.
         //  Do one set of computations for each bin.
-        for (; biter < endBins; biter++)
+        for (; biter < last_real_bin; biter++)
         {
             vector<particle_t> binQ = localBins[biter];
             int particles_per_bin = binQ.size();
@@ -298,9 +300,9 @@ int main( int argc, char **argv )
         if(rank == 0){
             biter = 0;
         }
-        endBins = local_bin_size-biter;
+        if(rank == )
 
-        for (;biter < endBins; biter++)
+        for (;biter < last_real_bin; biter++)
         {//Insert logic here
             int size = localBins[biter].size();
             for (int p = 0; p < size;) {
@@ -371,12 +373,11 @@ int main( int argc, char **argv )
         if(rank == 0){
             biter = 0;
         }
-        endBins = local_bin_size-biter;
 
         for(int i = 0; i < biter; i++){
             localBins[i].clear();
         }
-        for(int i = endBins; i < last*num_bin_row; i++){
+        for(int i = last_real_bin; i < last*num_bin_row; i++){
             localBins[i].clear();
         }
 
@@ -394,7 +395,7 @@ int main( int argc, char **argv )
             }   
         }
         if(rank < n_proc-1){
-            for(int boe = local_bin_size; boe < endBins; boe++){
+            for(int boe = local_bin_size; boe < last_real_bin; boe++){
                 //for(int i = 0; i < localBins[boe].size(); i++)
                 //    moveDown.push_back(localBins[boe][i]);
                 memcpy(&movingdown[downsize], localBins[boe].data(), localBins[boe].size());
