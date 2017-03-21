@@ -321,6 +321,7 @@ int main( int argc, char **argv )
         }
         MPI_Barrier(MPI_COMM_WORLD);
         int fa, fb;
+        fa = fb = 0;
         if(rank > 0){
             MPI_Send(moveUp.data(), moveUp.size(), PARTICLE, rank-1, rank, MPI_COMM_WORLD);
         }
@@ -393,7 +394,7 @@ int main( int argc, char **argv )
 
         MPI_Barrier(MPI_COMM_WORLD);
         //Same as above, we send data up and down
-
+        fa = fb = 0;
         if(rank > 0){
             MPI_Send(movingup, upsize, PARTICLE, rank-1, rank, MPI_COMM_WORLD);
         }
