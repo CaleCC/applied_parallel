@@ -154,11 +154,12 @@ int main( int argc, char **argv )
     //  allocate storage for local partition
     //
     int nlocal = partition_sizes[rank];
+    size_t movementsize = (n / n_proc) * sizeof(particle_t);
     particle_t *local = (particle_t*) malloc( nlocal * sizeof(particle_t) );
-    particle_t *fromAbove = (particle_t*) malloc( n/(2*n_proc) * sizeof(particle_t) );
-    particle_t *fromBelow = (particle_t*) malloc( n/(2*n_proc) * sizeof(particle_t) );
-    particle_t* movingup = (particle_t*) malloc(sizeof(particle_t) * n/(2*n_proc));
-    particle_t* movingdown = (particle_t*) malloc(sizeof(particle_t) * n/(2*n_proc));
+    particle_t *fromAbove = (particle_t*) malloc( movementsize );
+    particle_t *fromBelow = (particle_t*) malloc( movementsize );
+    particle_t* movingup = (particle_t*) malloc( movementsize );
+    particle_t* movingdown = (particle_t*) malloc( movementsize );
     //It is reasonable to assume that no more than half the total particles will travel between a local partition.
 
     
