@@ -170,26 +170,28 @@ int main( int argc, char **argv )
     int first = min(  rank    * rows_per_proc, num_bin_row);
     int last  = min( (rank+1) * rows_per_proc, num_bin_row);
     first--;
-    int last_real_bin = last-first;
+    int last_real_bin = last - first;
     last++;
+    int first_real_bin = 1;
     if(rank == 0){
+        first_real_bin--;
         last_real_bin--;
         first++; //On the top and bottom, we will have one less row (smaller halo)
     }
     else if(rank == n_proc){
         last--;
     }
-    int bins_proc = last - first; //General case
+    first_real_bin *= num_bin_row;
+    last_real_bin *= num_bin_row;
 
+    int bins_proc = last - first; //General case
     int local_bin_size = bins_proc * num_bin_row;
-    last_real_bin = last_real_bin * num_bin_row;
 
     vector<particle_t> localBins[local_bin_size];
-    //vector<particle_t> throwaway;
-    //localBins.push_back(throwaway);
-    //localBins.resize(local_bin_size); //Bins per row * number of rows.
 
     create_bins(localBins, local, nlocal, num_bin_row, first);
+
+
 
     //
     //  simulate a number of time steps
@@ -216,20 +218,13 @@ int main( int argc, char **argv )
           if( fsave && (step%SAVEFREQ) == 0 )
             save( fsave, n, particles );
         //This save won't really work now that no thread has the entire view of the particles.
-        
+
         //
         //  compute all forces
         //
         //We must account for halo regions- we do not want to calculate forces for the halo rows.
-        //These will generally be 0 to num_bin_row and local_bin_size+num_bin_row to local_bin_size+2*num_bin_row
-        //, except for the 0 rank worker process and n_proc rank process. We only must adjust for the starting value.
-
-        int biter = num_bin_row;
-        if(rank == 0){
-            biter = 0;
-        }
         //  Do one set of computations for each bin.
-        for (; biter < last_real_bin; biter++)
+        for (int biter = first_real_bin; biter < last_real_bin; biter++)
         {
             vector<particle_t> binQ = localBins[biter];
             int particles_per_bin = binQ.size();
@@ -237,21 +232,20 @@ int main( int argc, char **argv )
             for (int j = 0; j < particles_per_bin; j++) {
                 binQ[j].ax = binQ[j].ay = 0;
             }
-            int location = biter;
             vector<int> x_range;
             vector<int> y_range;
             x_range.push_back(0);
             y_range.push_back(0);
-            if (location >= num_bin_row) {
+            if (biter >= num_bin_row) {
                 y_range.push_back(-1);
             }
-            if (location < num_bin_row*(num_bin_row - 1)) {
+            if (biter < num_bin_row*(num_bin_row - 1)) {
                 y_range.push_back(1);
             }
-            if (location % num_bin_row != 0) {
+            if (biter % num_bin_row != 0) {
                 x_range.push_back(-1);
             }
-            if (location % num_bin_row != num_bin_row - 1) {
+            if (biter % num_bin_row != num_bin_row - 1) {
                 x_range.push_back(1);
             }
             //printf("x and y ranges initialized.\n");
@@ -259,8 +253,6 @@ int main( int argc, char **argv )
             for (int a = 0; a < x_range.size(); a++) {
                 for (int b = 0; b < y_range.size(); b++) {
                     int bin_num = biter + x_range[a] + num_bin_row*y_range[b];
-                    //printf("i: %d, bin_num: %d, bins[i].size(): %d, bins[bin_num].size(): %d\n",i, bin_num, bins[i].size(), bins[bin_num].size());
-
                     for (int c = 0; c < binQ.size(); c++) {
                         for (int d = 0; d < localBins[bin_num].size(); d++) {
                             apply_force(binQ[c], localBins[bin_num][d], &dmin, &davg, &navg);
@@ -297,28 +289,25 @@ int main( int argc, char **argv )
         //  must now be sent to the relevant folks.
         vector<particle_t> moveUp;
         vector<particle_t> moveDown;
-        biter = num_bin_row;
-        if(rank == 0){
-            biter = 0;
-        }
 
-        for (;biter < last_real_bin; biter++)
+        for (int biter = first_real_bin; biter < last_real_bin; biter++)
         {//Insert logic here
-            int size = localBins[biter].size();
+            vector<particle_t> binQ = localBins[biter];
+            int size = binQ.size();
             for (int p = 0; p < size;) {
                 //printf("Moving particle in bin %d, p = %d\n", biter, p);
-                move(localBins[biter][p]);
+                move(binQ[p]);
 
-                int x = floor(localBins[biter][p].x / binsize);
-                int y = floor(localBins[biter][p].y / binsize);
+                int x = floor(binQ[p].x / binsize);
+                int y = floor(binQ[p].y / binsize);
                 if (y * num_bin_row + x != biter)
                 {
                     if(biter < num_bin_row)
-                        moveUp.push_back(localBins[biter][p]);
+                        moveUp.push_back(binQ[p]);
                     else 
-                        moveDown.push_back(localBins[biter][p]);
+                        moveDown.push_back(binQ[p]);
 
-                    localBins[biter].erase(localBins[biter].begin() + p);
+                    binQ.erase(binQ.begin() + p);
                     size--;
                 }
                 else{
@@ -369,12 +358,8 @@ int main( int argc, char **argv )
 //And then sending the second topmost and second bottommost bin rows to our neighbors
 //And then receiving the updated halo regions.
 
-        biter = num_bin_row;
-        if(rank == 0){
-            biter = 0;
-        }
 
-        for(int i = 0; i < biter; i++){
+        for(int i = 0; i < first_real_bin; i++){
             localBins[i].clear();
         }
         for(int i = last_real_bin; i < last*num_bin_row; i++){
@@ -387,7 +372,7 @@ int main( int argc, char **argv )
         int upsize = 0;
         int downsize = 0;
         if(rank > 0){
-            for(int eob = biter; eob < biter + num_bin_row; eob++){
+            for(int eob = first_real_bin; eob < first_real_bin + num_bin_row; eob++){
                 //for(int i = 0; i < localBins[eob].size(); i++)
                 //    moveUp.push_back(localBins[eob][i]);
                 memcpy(&movingup[upsize], localBins[eob].data(), localBins[eob].size());
