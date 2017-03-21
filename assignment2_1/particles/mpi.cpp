@@ -19,7 +19,7 @@ using namespace std;
 //
 //create bins with length of cutoff
 //
-void create_bins(vector<particle_t>[] &bins, particle_t* particles, int n, int num_bin_row, int first) {
+void create_bins(vector<particle_t> &bins[], particle_t* particles, int n, int num_bin_row, int first) {
 
     //put particles in bins according to their locations
     for (int j = 0; j < n; j++) {
@@ -30,7 +30,7 @@ void create_bins(vector<particle_t>[] &bins, particle_t* particles, int n, int n
     printf("from %d, Bins created\n", first);
 }
 //Partition particles into n_proc bins based on their row location. 
-int* partition_bins(vector<particle_t>[] &bins, particle_t* particles, int n, int num_bin_row, int n_proc) {
+int* partition_bins(vector<particle_t> &bins[], particle_t* particles, int n, int num_bin_row, int n_proc) {
     int* particles_per_process = (int*) malloc(sizeof(int)*n_proc);
     memset ( particles_per_process, 0, sizeof(int)*n_proc);
 
@@ -108,7 +108,7 @@ int main( int argc, char **argv )
 
     particle_t *particles = (particle_t*) malloc( n * sizeof(particle_t) );
 
-    vector<particle_t>[n_proc] bins;
+    vector<particle_t> bins[n_proc];
     
     MPI_Datatype PARTICLE;
     MPI_Type_contiguous( 6, MPI_DOUBLE, &PARTICLE );
@@ -181,7 +181,7 @@ int main( int argc, char **argv )
     }
     int local_bin_size = bins_proc * num_bin_row;
 
-    vector<particle_t>[local_bin_size] localBins;
+    vector<particle_t> localBins[local_bin_size];
     //vector<particle_t> throwaway;
     //localBins.push_back(throwaway);
     //localBins.resize(local_bin_size); //Bins per row * number of rows.
