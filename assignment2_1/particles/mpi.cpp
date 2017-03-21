@@ -328,13 +328,13 @@ int main( int argc, char **argv )
         if(rank < n_proc-1){
             MPI_Status stat;
             MPI_Recv(fromBelow, n, PARTICLE, rank+1, rank+1, MPI_COMM_WORLD, &stat);
-            MPI_Get_count(&stat, PARTICLE, &fa);
+            MPI_Get_count(&stat, PARTICLE, &fb);
             MPI_Send(moveDown.data(), moveDown.size(), PARTICLE, rank+1, rank, MPI_COMM_WORLD);
         }
         if(rank > 0){
             MPI_Status stat;
             MPI_Recv(fromAbove, n, PARTICLE, rank-1, rank-1, MPI_COMM_WORLD, &stat);
-            MPI_Get_count(&stat, PARTICLE, &fb);
+            MPI_Get_count(&stat, PARTICLE, &fa);
         }
         //Now we wish to recieve the data of all processes which have moved particles into our system.
         //We also wish to send the data of particles which have exited our system to our neighboring processes.
@@ -401,13 +401,13 @@ int main( int argc, char **argv )
         if(rank < n_proc-1){
             MPI_Status stat;
             MPI_Recv(fromBelow, n, PARTICLE, rank+1, rank+1, MPI_COMM_WORLD, &stat);
-            MPI_Get_count(&stat, PARTICLE, &fa);
+            MPI_Get_count(&stat, PARTICLE, &fb);
             MPI_Send(movingdown, downsize, PARTICLE, rank+1, rank, MPI_COMM_WORLD);
         }
         if(rank > 0){
             MPI_Status stat;
             MPI_Recv(fromAbove, n, PARTICLE, rank-1, rank-1, MPI_COMM_WORLD, &stat);
-            MPI_Get_count(&stat, PARTICLE, &fb);
+            MPI_Get_count(&stat, PARTICLE, &fa);
         }
         //We must now handle the data received differently though; we have to rebin it into our halo regions.
         if(rank > 0)
