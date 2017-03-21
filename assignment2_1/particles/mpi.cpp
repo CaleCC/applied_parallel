@@ -187,6 +187,7 @@ int main( int argc, char **argv )
     // the offset that needs to be subtracted when calculating the location of bin where the particle stays in
     double off_set_x = rank%n_proc*p_size_x;
     double off_set_y = 0;
+		printf( "proc: %d  . number of bins: %d. number of bins in a row of processor: %d, p_bin_number_y: %d, left %d, right %d\n",rank,bin_num,p_bin_num_x,p_bin_num_y,halo_left,halo_right);
 
     //  simulate a number of time steps
     //
@@ -223,17 +224,16 @@ int main( int argc, char **argv )
           }
 
         }
-
+				printf( "proc %d start receive\n",rank);
         //receive the number of particle from neighbour
 
         rec_r_count = 0;
+				rec_r_count = 0;
         if(halo_left){
-          rec_l_count = 0;
           MPI_Irecv(&rec_l_count,1,MPI_INT,rank-1,rank,MPI_COMM_WORLD,&rec_req_l);
         }
 
         if(halo_right){
-          rec_r_count = 0;
           MPI_Irecv(&rec_r_count,1,MPI_INT,rank+1,rank,MPI_COMM_WORLD,&rec_req_r);
         }
 
@@ -324,25 +324,24 @@ int main( int argc, char **argv )
           }
         }
       }
-      if( find_option( argc, argv, "-no" ) == -1 )
-      {
-
-        MPI_Reduce(&davg,&rdavg,1,MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
-        MPI_Reduce(&navg,&rnavg,1,MPI_INT,MPI_SUM,0,MPI_COMM_WORLD);
-        MPI_Reduce(&dmin,&rdmin,1,MPI_DOUBLE,MPI_MIN,0,MPI_COMM_WORLD);
+			if( find_option( argc, argv, "-no" ) == -1 ){
+				MPI_Reduce(&davg,&rdavg,1,MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
+				MPI_Reduce(&navg,&rnavg,1,MPI_INT,MPI_SUM,0,MPI_COMM_WORLD);
+				MPI_Reduce(&dmin,&rdmin,1,MPI_DOUBLE,MPI_MIN,0,MPI_COMM_WORLD);
 
 
-        if (rank == 0){
-          //
-          // Computing statistical data
-          //
-          if (rnavg) {
-            absavg +=  rdavg/rnavg;
-            nabsavg++;
-          }
-          if (rdmin < absmin) absmin = rdmin;
-        }
-      }
+				if (rank == 0){
+					//
+					// Computing statistical data
+					//
+					if (rnavg) {
+						absavg +=  rdavg/rnavg;
+						nabsavg++;
+					}
+					if (rdmin < absmin) absmin = rdmin;
+				}
+			}
+
 
         //
         //  move particles
@@ -418,28 +417,27 @@ int main( int argc, char **argv )
         local[nlocal] = receive_r[i];
         nlocal++;
       }
-          //
-          //  save if necessary
-          //
-          if( find_option( argc, argv, "-no" ) == -1 )
-          {
+			if( find_option( argc, argv, "-no" ) == -1 ){
+					if( (step%SAVEFREQ) == 0 )
+				{
+				MPI_Gather(&nlocal,1,MPI_INT,num_partic_proc,1,MPI_INT,0,MPI_COMM_WORLD);
+				if (rank == 0)
+				{
+					int tmp_nsum=0;
+					for(int i=0;i<n_proc;i++)
+					{
+						partition_offsets[i]=tmp_nsum;
+						tmp_nsum+=num_partic_proc[i];
+					}
+				}
 
-            MPI_Reduce(&davg,&rdavg,1,MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
-            MPI_Reduce(&navg,&rnavg,1,MPI_INT,MPI_SUM,0,MPI_COMM_WORLD);
-            MPI_Reduce(&dmin,&rdmin,1,MPI_DOUBLE,MPI_MIN,0,MPI_COMM_WORLD);
+				MPI_Gatherv( local, nlocal, PARTICLE, particles,num_partic_proc, partition_offsets, PARTICLE,0, MPI_COMM_WORLD );
+				if (rank == 0)
+					save( fsave, n, particles );
+				}
+			 }
 
 
-            if (rank == 0){
-              //
-              // Computing statistical data
-              //
-              if (rnavg) {
-                absavg +=  rdavg/rnavg;
-                nabsavg++;
-              }
-              if (rdmin < absmin) absmin = rdmin;
-            }
-          }
       MPI_Barrier(MPI_COMM_WORLD);
     }
     simulation_time = read_timer( ) - simulation_time;
