@@ -81,9 +81,9 @@ int main( int argc, char **argv )
 
     set_size(n);
     double size = sqrt(density*n);// from common.cpp
-    double bin_size = size / (n_proc*floor(floor(size/cutoff)/n_proc));//must ensure that bin fits in the processor
-    int num_bin_row = floor(size/bin_size);
-
+    //double bin_size = size / (n_proc*floor(floor(size/cutoff)/n_proc));//must ensure that bin fits in the processor
+    int num_bin_row = n_proc*floor(floor(size/cutoff)/n_proc);
+		double bin_size = size/num_bin_row;
     //seperate the grid into rectanlge so only need to commucinate between left and right
     int p_bin_num_x = num_bin_row / n_proc ;
     int p_bin_num_y = num_bin_row;
