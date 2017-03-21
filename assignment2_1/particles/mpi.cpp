@@ -370,7 +370,9 @@ int main( int argc, char **argv )
             send_l[send_l_count] = local[i];
             send_l_count++;
             change_flag=1;
-          }else if(local[i].x >= off_set_x+p_size_x){
+          }
+
+					if(local[i].x >= off_set_x+p_size_x){
             send_r[send_r_count] = local[i];
             send_r_count++;
             change_flag = 1;
@@ -382,6 +384,7 @@ int main( int argc, char **argv )
             i--;
           }
       }
+			rintf( "proc %d finished check the moved particles \n",rank);
 			if(halo_left){
 				MPI_Irecv(&rec_l_count,1,MPI_INT,rank-1,rank,MPI_COMM_WORLD,&rec_req_l);
 			}
