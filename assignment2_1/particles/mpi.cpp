@@ -70,8 +70,6 @@ int main( int argc, char **argv )
     double dmin, absmin=1.0,davg,absavg=0.0;
     double rdavg,rdmin;
     int rnavg; 
-    int* local_size;
-    int* local_offset;
     int* partition_sizes;
     int* partition_offsets;
     particle_t *sendBuf;
@@ -109,9 +107,6 @@ int main( int argc, char **argv )
     FILE *fsum = sumname && rank == 0 ? fopen ( sumname, "a" ) : NULL;
 
     particle_t *particles = (particle_t*) malloc( n * sizeof(particle_t) );
-
-    local_size = (int*)malloc(sizeof(int)*n_proc);
-    local_offset = (int*)malloc(sizeof(int)*n_proc);
 
     vector<vector<particle_t> > bins;
     
@@ -154,16 +149,16 @@ int main( int argc, char **argv )
         }
         printf("Particles and send buffer initialized\n");
     }
-
-        MPI_Scatter( partition_sizes, n_proc, MPI_INT, local_size, n_proc, MPI_INT, 0, MPI_COMM_WORLD );
+        //MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Bcast( partition_sizes, n_proc, MPI_INT, 0, MPI_COMM_WORLD );
         printf("rank %d: partition sizes initialized\n",rank);
-        MPI_Scatter( partition_offsets, n_proc, MPI_INT, local_offset, n_proc, MPI_INT, 0, MPI_COMM_WORLD );
+        MPI_Bcast( partition_offsets, n_proc, MPI_INT, 0, MPI_COMM_WORLD );
         //At this point, we expect every worker to have a complete set of knowledge regarding the sizes and offsets.
         printf("rank %d: partition offsets initialized\n",rank);
     //
     //  allocate storage for local partition
     //
-    int nlocal = local_size[rank];
+    int nlocal = partition_sizes[rank];
     particle_t *local = (particle_t*) malloc( nlocal * sizeof(particle_t) );
     particle_t *fromAbove = (particle_t*) malloc( n/(2*n_proc) * sizeof(particle_t) );
     particle_t *fromBelow = (particle_t*) malloc( n/(2*n_proc) * sizeof(particle_t) );
@@ -172,7 +167,7 @@ int main( int argc, char **argv )
     //It is reasonable to assume that no more than half the total particles will travel between a local partition.
 
     
-    MPI_Scatterv( particles, local_size, local_offset, PARTICLE, local, nlocal, PARTICLE, 0, MPI_COMM_WORLD );
+    MPI_Scatterv( particles, partition_sizes, partition_offsets, PARTICLE, local, nlocal, PARTICLE, 0, MPI_COMM_WORLD );
     printf("rank %d: particles scattered\n",rank);
     //
     //  Create bins for local rows.
@@ -269,7 +264,7 @@ int main( int argc, char **argv )
                 }
             }
         }
-     
+        MPI_Barrier(MPI_COMM_WORLD);
         if( find_option( argc, argv, "-no" ) == -1 )
         {
           
@@ -327,6 +322,7 @@ int main( int argc, char **argv )
                 }
             }
         }
+        MPI_Barrier(MPI_COMM_WORLD);
         int fa, fb;
         if(rank > 0){
             MPI_Send(moveUp.data(), moveUp.size(), PARTICLE, rank-1, rank, MPI_COMM_WORLD);
@@ -345,7 +341,7 @@ int main( int argc, char **argv )
         }
         //Now we wish to recieve the data of all processes which have moved particles into our system.
         //We also wish to send the data of particles which have exited our system to our neighboring processes.
-
+        MPI_Barrier(MPI_COMM_WORLD);
         for(int i = 0; i < fa; i++){
             int x = floor(fromAbove[i].x / binsize);
             int y = floor(fromAbove[i].y / binsize);
@@ -403,6 +399,7 @@ int main( int argc, char **argv )
                 downsize += localBins[boe].size();
             }   
         }
+        MPI_Barrier(MPI_COMM_WORLD);
         //Same as above, we send data up and down
         if(rank > 0){
             MPI_Send(movingup, upsize, PARTICLE, rank-1, rank, MPI_COMM_WORLD);
@@ -432,6 +429,7 @@ int main( int argc, char **argv )
                 int y = floor(fromBelow[j].y / binsize);
                 localBins[x + (y-first) * num_bin_row].push_back(fromBelow[j]);
             }
+        MPI_Barrier(MPI_COMM_WORLD);
 //End of time step.
     }
     simulation_time = read_timer( ) - simulation_time;
@@ -471,8 +469,6 @@ int main( int argc, char **argv )
     free( partition_sizes );
     free( local );
     free( particles );
-    free( local_size );
-    free( local_offset );
     free( sendBuf );
     free( fromAbove );
     free( fromBelow );
