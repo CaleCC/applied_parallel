@@ -47,12 +47,12 @@ int* partition_bins(vector<vector<particle_t> > &bins, particle_t* particles, in
         particles_per_process[procdex]++;
         //If this particle is in a halo bin, we must also import it twice.
         int boundcheck = y % rows_per_proc;
-        if(boundcheck == 0 && y != 0){
+        if(boundcheck == 0 && y != 0 && procdex < n_proc-1){
             //We now know that y is on a boundary, and must be included in procdex+1.
             bins[procdex+1].push_back(particles[j]);
             particles_per_process[procdex+1]++;
         }
-        else if(boundcheck == rows_per_proc-1 && y != num_bin_row){
+        else if(boundcheck == rows_per_proc-1 && y != num_bin_row && procdex > 0){
             //We now know that y is on a boundary, and must be included in procdex-1.
             bins[procdex-1].push_back(particles[j]);
             particles_per_process[procdex-1]++;
