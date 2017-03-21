@@ -154,7 +154,7 @@ int main( int argc, char **argv )
     //  allocate storage for local partition
     //
     int nlocal = partition_sizes[rank];
-    size_t movementsize = (n / n_proc) * sizeof(particle_t);
+    size_t movementsize = n * sizeof(particle_t);
     particle_t *local = (particle_t*) malloc( nlocal * sizeof(particle_t) );
     particle_t *fromAbove = (particle_t*) malloc( movementsize );
     particle_t *fromBelow = (particle_t*) malloc( movementsize );
@@ -326,13 +326,13 @@ int main( int argc, char **argv )
         }
         if(rank < n_proc-1){
             MPI_Status stat;
-            MPI_Recv(fromBelow, n/n_proc, PARTICLE, rank+1, rank+1, MPI_COMM_WORLD, &stat);
+            MPI_Recv(fromBelow, n, PARTICLE, rank+1, rank+1, MPI_COMM_WORLD, &stat);
             MPI_Get_count(&stat, PARTICLE, &fa);
             MPI_Send(moveDown.data(), moveDown.size(), PARTICLE, rank+1, rank, MPI_COMM_WORLD);
         }
         if(rank > 0){
             MPI_Status stat;
-            MPI_Recv(fromAbove, n/n_proc, PARTICLE, rank-1, rank-1, MPI_COMM_WORLD, &stat);
+            MPI_Recv(fromAbove, n, PARTICLE, rank-1, rank-1, MPI_COMM_WORLD, &stat);
             MPI_Get_count(&stat, PARTICLE, &fb);
         }
         //Now we wish to recieve the data of all processes which have moved particles into our system.
@@ -399,13 +399,13 @@ int main( int argc, char **argv )
         }
         if(rank < n_proc-1){
             MPI_Status stat;
-            MPI_Recv(fromBelow, n/n_proc, PARTICLE, rank+1, rank+1, MPI_COMM_WORLD, &stat);
+            MPI_Recv(fromBelow, n, PARTICLE, rank+1, rank+1, MPI_COMM_WORLD, &stat);
             MPI_Get_count(&stat, PARTICLE, &fa);
             MPI_Send(movingdown, downsize, PARTICLE, rank+1, rank, MPI_COMM_WORLD);
         }
         if(rank > 0){
             MPI_Status stat;
-            MPI_Recv(fromAbove, n/n_proc, PARTICLE, rank-1, rank-1, MPI_COMM_WORLD, &stat);
+            MPI_Recv(fromAbove, n, PARTICLE, rank-1, rank-1, MPI_COMM_WORLD, &stat);
             MPI_Get_count(&stat, PARTICLE, &fb);
         }
         //We must now handle the data received differently though; we have to rebin it into our halo regions.
