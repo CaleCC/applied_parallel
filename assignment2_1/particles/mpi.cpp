@@ -33,26 +33,22 @@ void create_bins(vector<particle_t> bins[], particle_t* particles, int n, int nu
 void partition_bins(vector<particle_t> bins[], particle_t* particles, int* particles_per_process, int n, int num_bin_row, int n_proc) {
     
     memset ( particles_per_process, 0, sizeof(int)*n_proc);
-
-    int num_bins = num_bin_row * num_bin_row;
     int rows_per_proc = (num_bin_row + n_proc -1) / n_proc;
-    //bins.resize(n_proc);
     //put particles in bins according to their locations
     for (int j = 0; j < n; j++) {
         //int x = floor(particles[j].x / binsize);
         int y = floor(particles[j].y / binsize);
-        //int bindex = x + y * num_bin_row;
         int procdex = floor(y / rows_per_proc);
         bins[procdex].push_back(particles[j]);
         particles_per_process[procdex]++;
         //If this particle is in a halo bin, we must also import it twice.
         int boundcheck = y % rows_per_proc;
-        if(boundcheck == 0 && y != 0 && procdex < n_proc-1){
+        if(boundcheck == 0 && y != 0 ){
             //We now know that y is on a boundary, and must be included in procdex-1.
             bins[procdex-1].push_back(particles[j]);
             particles_per_process[procdex-1]++;
         }
-        else if(boundcheck == rows_per_proc-1 && y != num_bin_row && procdex > 0){
+        else if(boundcheck == rows_per_proc-1 && y != num_bin_row-1){
             //We now know that y is on a boundary, and must be included in procdex+1.
             bins[procdex+1].push_back(particles[j]);
             particles_per_process[procdex+1]++;
