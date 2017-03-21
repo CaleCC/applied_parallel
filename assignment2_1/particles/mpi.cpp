@@ -13,7 +13,7 @@
 #define cutoff  0.01
 #define min_r   (cutoff/100)
 #define dt      0.0005
-#define binsize (cutoff*2)
+#define binsize (cutoff)
 
 using namespace std;
 //
@@ -98,8 +98,10 @@ int main( int argc, char **argv )
     //
     //  allocate generic resources
     //
-    FILE *fsave = savename && rank == 0 ? fopen( savename, "w" ) : NULL;
-    FILE *fsum = sumname && rank == 0 ? fopen ( sumname, "a" ) : NULL;
+    if(rank == 0){
+        FILE *fsave = savename && rank == 0 ? fopen( savename, "w" ) : NULL;
+        FILE *fsum = sumname && rank == 0 ? fopen ( sumname, "a" ) : NULL;
+    }
 
     particle_t *particles = (particle_t*) malloc( n * sizeof(particle_t) );
     partition_offsets = (int*) malloc(sizeof(int) * n_proc);
@@ -490,8 +492,6 @@ int main( int argc, char **argv )
     //
     //  release resources
     //
-    if ( fsum )
-        fclose( fsum );
     free( partition_offsets );
     free( partition_sizes );
     free( local );
@@ -503,10 +503,12 @@ int main( int argc, char **argv )
     free( zippy );
     if(rank == 0){
         free( sendBuf );
+        if( fsave )
+            fclose( fsave );
+        if ( fsum )
+            fclose( fsum );
     }
 
-    if( fsave )
-        fclose( fsave );
     
     MPI_Finalize( );
     
