@@ -384,7 +384,7 @@ int main( int argc, char **argv )
             for(int eob = first_real_bin; eob < first_real_bin + num_bin_row; eob++){
                 //for(int i = 0; i < localBins[eob].size(); i++)
                 //    moveUp.push_back(localBins[eob][i]);
-                memcpy(&movingup[upsize], localBins[eob].data(), localBins[eob].size());
+                memcpy(&movingup[upsize], localBins[eob].data(), localBins[eob].size() * sizeof(particle_t));
                 upsize += localBins[eob].size();
             }   
         }
@@ -392,7 +392,7 @@ int main( int argc, char **argv )
             for(int boe = local_bin_size; boe < last_real_bin; boe++){
                 //for(int i = 0; i < localBins[boe].size(); i++)
                 //    moveDown.push_back(localBins[boe][i]);
-                memcpy(&movingdown[downsize], localBins[boe].data(), localBins[boe].size());
+                memcpy(&movingdown[downsize], localBins[boe].data(), localBins[boe].size() * sizeof(particle_t));
                 downsize += localBins[boe].size();
             }   
         }
