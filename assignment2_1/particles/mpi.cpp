@@ -102,7 +102,7 @@ int main( int argc, char **argv )
     FILE *fsum = sumname && rank == 0 ? fopen ( sumname, "a" ) : NULL;
 
     particle_t *particles = (particle_t*) malloc( n * sizeof(particle_t) );
-    partition_offsets = (int*) malloc(sizeof(int) * n_proc+1);
+    partition_offsets = (int*) malloc(sizeof(int) * n_proc);
     partition_sizes = (int*) malloc(sizeof(int)*n_proc);
 
     vector<particle_t> bins[n_proc];
@@ -131,10 +131,11 @@ int main( int argc, char **argv )
         partition_bins(bins, particles, partition_sizes, n, num_bin_row, n_proc);
         int totalSize = 0;
         partition_offsets[0] = 0;
-        for (int i = 0; i < n_proc; i++){
+        for (int i = 0; i < n_proc-1; i++){
             totalSize += partition_sizes[i];
             partition_offsets[i+1] = partition_offsets[i] + partition_sizes[i]; 
         }
+        totalSize += partition_sizes[n_proc-1];
         //Initialize the large array of particles we will be sending
         sendBuf = (particle_t*) malloc( totalSize * sizeof(particle_t) );
         totalSize = 0;
@@ -148,7 +149,7 @@ int main( int argc, char **argv )
         //MPI_Barrier(MPI_COMM_WORLD);
         MPI_Bcast( partition_sizes, n_proc, MPI_INT, 0, MPI_COMM_WORLD );
         printf("rank %d: partition sizes initialized\n",rank);
-        MPI_Bcast( partition_offsets, n_proc+1, MPI_INT, 0, MPI_COMM_WORLD );
+        MPI_Bcast( partition_offsets, n_proc, MPI_INT, 0, MPI_COMM_WORLD );
         //At this point, we expect every worker to have a complete set of knowledge regarding the sizes and offsets.
         printf("rank %d: partition offsets initialized\n",rank);
     //
