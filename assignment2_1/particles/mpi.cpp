@@ -107,6 +107,7 @@ int main( int argc, char **argv )
     FILE *fsum = sumname && rank == 0 ? fopen ( sumname, "a" ) : NULL;
 
     particle_t *particles = (particle_t*) malloc( n * sizeof(particle_t) );
+    partition_offsets = (int*) malloc(sizeof(int) * n_proc+1);
 
     vector<particle_t> bins[n_proc];
     
@@ -132,7 +133,6 @@ int main( int argc, char **argv )
         //While we do this, we want to also count the number of particles in each level;
         //We use this info to malloc a particle_t array to scatterv across all processes.
         partition_sizes = partition_bins(bins, particles, n, num_bin_row, n_proc);
-        partition_offsets = (int*) malloc(sizeof(int) * n_proc+1);
         int totalSize = 0;
         partition_offsets[0] = 0;
         for (int i = 0; i < n_proc; i++){
