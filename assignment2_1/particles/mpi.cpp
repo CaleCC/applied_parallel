@@ -138,11 +138,9 @@ int main( int argc, char **argv )
         totalSize += partition_sizes[n_proc-1];
         //Initialize the large array of particles we will be sending
         sendBuf = (particle_t*) malloc( totalSize * sizeof(particle_t) );
-        totalSize = 0;
         //This loop is meant to fill sendBuf with contiguous particles.
         for( int i = 0; i < n_proc; i++){
-            memcpy(&sendBuf[totalSize], bins[i].data(), partition_sizes[i]);
-            totalSize += partition_sizes[i];
+            memcpy(&sendBuf[partition_offsets[i]], bins[i].data(), partition_sizes[i] * sizeof(particle_t));
         }
         printf("Particles and send buffer initialized\n");
     }
