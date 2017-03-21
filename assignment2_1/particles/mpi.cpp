@@ -5,7 +5,6 @@
 #include <math.h>
 #include "common.h"
 #include <vector>
-#include <array>
 #include <iostream>
 #include <string.h>
 
@@ -20,7 +19,7 @@ using namespace std;
 //
 //create bins with length of cutoff
 //
-void create_bins(array<vector<particle_t> > &bins, particle_t* particles, int n, int num_bin_row, int first) {
+void create_bins(vector<particle_t>[] &bins, particle_t* particles, int n, int num_bin_row, int first) {
 
     //put particles in bins according to their locations
     for (int j = 0; j < n; j++) {
@@ -31,13 +30,13 @@ void create_bins(array<vector<particle_t> > &bins, particle_t* particles, int n,
     printf("from %d, Bins created\n", first);
 }
 //Partition particles into n_proc bins based on their row location. 
-int* partition_bins(array<vector<particle_t> > &bins, particle_t* particles, int n, int num_bin_row, int n_proc) {
+int* partition_bins(vector<particle_t>[] &bins, particle_t* particles, int n, int num_bin_row, int n_proc) {
     int* particles_per_process = (int*) malloc(sizeof(int)*n_proc);
     memset ( particles_per_process, 0, sizeof(int)*n_proc);
 
     int num_bins = num_bin_row * num_bin_row;
     int rows_per_proc = (num_bin_row + n_proc -1) / n_proc;
-//    bins.resize(n_proc);
+    bins.resize(n_proc);
     //put particles in bins according to their locations
     for (int j = 0; j < n; j++) {
         //int x = floor(particles[j].x / binsize);
@@ -109,7 +108,7 @@ int main( int argc, char **argv )
 
     particle_t *particles = (particle_t*) malloc( n * sizeof(particle_t) );
 
-    array<vector<particle_t>,n_proc > bins;
+    vector<particle_t>[n_proc] bins;
     
     MPI_Datatype PARTICLE;
     MPI_Type_contiguous( 6, MPI_DOUBLE, &PARTICLE );
@@ -180,10 +179,11 @@ int main( int argc, char **argv )
     if(rank == 0 || rank == n_proc){
         bins_proc--; //On the top and bottom, we will have one less row (smaller halo)
     }
-
     int local_bin_size = bins_proc * num_bin_row;
-    array<vector<particle_t>,local_bin_size > localBins;
 
+    vector<particle_t>[local_bin_size] localBins;
+    //vector<particle_t> throwaway;
+    //localBins.push_back(throwaway);
     //localBins.resize(local_bin_size); //Bins per row * number of rows.
 
     create_bins(localBins, local, nlocal, num_bin_row, first);
