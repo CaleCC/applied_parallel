@@ -332,7 +332,7 @@ int main( int argc, char **argv )
             }
             localBins[biter] = binQ;
         }
-        MPI_Barrier(MPI_COMM_WORLD);
+        
         //Handle the zippy particles first.
         int howManyZips[n_proc];
         MPI_Allgatherv(localzip.data(), zip, PARTICLE, zippy, partition_sizes, partition_offsets, PARTICLE, MPI_COMM_WORLD);
@@ -345,7 +345,7 @@ int main( int argc, char **argv )
                     localBins[x + (y-first) * num_bin_row].push_back(zippy[partition_offsets[i]+j]);
             }
         }
-
+        MPI_Barrier(MPI_COMM_WORLD);
 
         int fa, fb;
         fa = fb = 0;
@@ -500,7 +500,7 @@ int main( int argc, char **argv )
     free( fromBelow );
     free( movingup );
     free( movingdown );
-    //free( zippy );
+    free( zippy );
     if(rank == 0){
         free( sendBuf );
     }
