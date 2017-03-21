@@ -365,7 +365,7 @@ int main( int argc, char **argv )
         for(int i = 0; i < first_real_bin; i++){
             localBins[i].clear();
         }
-        for(int i = last_real_bin; i < last*num_bin_row; i++){
+        for(int i = last_real_bin; i < last_real_bin+num_bin_row; i++){
             localBins[i].clear();
         }
 
