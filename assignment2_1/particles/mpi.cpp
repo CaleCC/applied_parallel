@@ -152,7 +152,7 @@ int main( int argc, char **argv )
         //MPI_Barrier(MPI_COMM_WORLD);
         MPI_Bcast( partition_sizes, n_proc, MPI_INT, 0, MPI_COMM_WORLD );
         printf("rank %d: partition sizes initialized\n",rank);
-        MPI_Bcast( partition_offsets, n_proc, MPI_INT, 0, MPI_COMM_WORLD );
+        MPI_Bcast( partition_offsets, n_proc+1, MPI_INT, 0, MPI_COMM_WORLD );
         //At this point, we expect every worker to have a complete set of knowledge regarding the sizes and offsets.
         printf("rank %d: partition offsets initialized\n",rank);
     //
