@@ -3,7 +3,11 @@
 #include <stdio.h>
 #include <assert.h>
 #include "common.h"
+#include <vector>
+#include<math.h>
+#include <iostream>
 
+using namespace std;
 #define density 0.0005
 #define mass    0.01
 #define cutoff  0.01
@@ -77,7 +81,7 @@ int main( int argc, char **argv )
     set_size(n);
     double size = sqrt(density*n);// from common.cpp
     double bin_size = size / (n_proc*floor(floor(size/cutoff)/n_proc));//must ensure that bin fits in the processor
-    int bin_num_row = floor(size/bin_size);
+    int num_bin_row = floor(size/bin_size);
 
     //seperate the grid into rectanlge so only need to commucinate between left and right
     int p_bin_num_x = num_bin_row / n_proc ;
@@ -101,10 +105,10 @@ int main( int argc, char **argv )
     int bin_num = num_bin_row * (proc_bin_width); //the number of bins in each processor
 
     //set up the buffer to send and receive data in halo
-    particle_t *send_l = (particle_t*) mallco( 4*num_bin_row*sizeof(particle_t));
-    particle_t *send_r = (particle_t*) mallco( 4*num_bin_row*sizeof(particle_t));
-    particle_t *receive_l = (particle_t*) mallco( 4*num_bin_row*sizeof(particle_t));
-    particle_t *receive_r = (particle_t*) mallco( 4*num_bin_row*sizeof(particle_t));
+    particle_t *send_l = (particle_t*) malloc( 4*num_bin_row*sizeof(particle_t));
+    particle_t *send_r = (particle_t*) malloc( 4*num_bin_row*sizeof(particle_t));
+    particle_t *receive_l = (particle_t*) malloc( 4*num_bin_row*sizeof(particle_t));
+    particle_t *receive_r = (particle_t*) malloc( 4*num_bin_row*sizeof(particle_t));
     int send_l_count = 0;
     int send_r_count = 0;
     int rec_l_count = 0;
@@ -173,7 +177,7 @@ int main( int argc, char **argv )
     int nlocal = 0;
     MPI_Scatter(num_partic_proc,1,MPI_INT,&nlocal,1,MPI_INT,0,MPI_COMM_WORLD);
     particle_t *local = (particle_t*) malloc( nlocal * sizeof(particle_t) );
-    vector< vector<particle_t*>> bins;
+    vector< vector<particle_t*> > bins;
     create_bins(bins, bin_num);
     MPI_Scatter(num_partic_proc,1,MPI_INT,&nlocal,1,MPI_INT,0,MPI_COMM_WORLD);
     MPI_Scatterv( assign_particles_to_p, partition_sizes, partition_offsets, PARTICLE, local, particle_per_proc, PARTICLE, 0, MPI_COMM_WORLD );
@@ -192,7 +196,7 @@ int main( int argc, char **argv )
         dmin = 1.0;
         davg = 0.0;
 
-        for(int i = 0; i < num_bins; i++){
+        for(int i = 0; i < bin_num; i++){
           bins[i].clear();
         }
 
@@ -206,13 +210,13 @@ int main( int argc, char **argv )
         for(int i = 0; i < p_bin_num_y; i++){
           if(halo_left){
             for(int j = 0; j < bins[halo_left + i*(proc_bin_width)].size();j++){
-                send_l[send_l_count] = bins[halo_left+i*(proc_bin_width)][j];
+                send_l[send_l_count] = *bins[halo_left+i*(proc_bin_width)][j];
                 send_l_count++;
             }
           }//if halo left exist
           if(halo_right){//if halo right exists
             for(int j = 0; j <bins[p_bin_num_x - 1+halo_left+i*(proc_bin_width)].size(); j++){
-              send_r[send_r_count] = bins[p_bin_num_x-1+halo_left+ i*(proc_bin_width)][j];
+              send_r[send_r_count] = *bins[p_bin_num_x-1+halo_left+ i*(proc_bin_width)][j];
               send_r_count++;
             }
           }
@@ -287,7 +291,7 @@ int main( int argc, char **argv )
         for(int p = 0; p < nlocal; p++){
           local[p].ax = 0;
           local[p].ay = 0;
-          int location = bin_loc(local[p],proc_bin_width,bin_size, off_set_x-halo_left*bin_size,off_y );
+          int location = bin_loc(local[p],proc_bin_width,bin_size, off_set_x-halo_left*bin_size,off_set_y );
           vector<int> x_range;
           vector<int> y_range;
           x_range.push_back(0);
@@ -313,7 +317,7 @@ int main( int argc, char **argv )
 
             for (int c = 0; c < bins[nbin].size(); c++) {
 
-                apply_force(local[p], bins[nbin][c], &dmin, &davg, &navg);
+                apply_force(local[p], *bins[nbin][c], &dmin, &davg, &navg);
                 //printf("apply_force end\n");
             }
           }
@@ -353,11 +357,11 @@ int main( int argc, char **argv )
       int change_flag = 0;
       for(int i = 0; i < nlocal;i++){
           change_flag = 0;
-          if(local[i].x < off_x){
+          if(local[i].x < off_set_x){
             send_l[send_l_count] = local[i];
             send_l_count++;
             change_flag=1;
-          }else if(local[i].x >= off_x+p_size_x){
+          }else if(local[i].x >= off_set_x+p_size_x){
             send_r[send_r_count] = local[i];
             send_r_count++;
             change_flag = 1;
@@ -416,26 +420,25 @@ int main( int argc, char **argv )
           //
           //  save if necessary
           //
-        if( find_option( argc, argv, "-no" ) == -1 )
-        {
-          if( (step%SAVEFREQ) == 0 )
-            {
-              MPI_Gather(&nlocal,1,MPI_INT,partition_ns,1,MPI_INT,0,MPI_COMM_WORLD);
-              if (rank == 0)
-              {
-                int tmp_nsum=0;
-                for(int i=0;i<n_proc;i++)
-                {
-                  partition_offsets[i]=tmp_nsum;
-                  tmp_nsum+=partition_ns[i];
-                }
-              }
+          if( find_option( argc, argv, "-no" ) == -1 )
+          {
 
-              MPI_Gatherv( local, nlocal, PARTICLE, particles, partition_ns, partition_offsets, PARTICLE,0, MPI_COMM_WORLD );
-              if (rank == 0)
-                save( fsave, n, particles );
+            MPI_Reduce(&davg,&rdavg,1,MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
+            MPI_Reduce(&navg,&rnavg,1,MPI_INT,MPI_SUM,0,MPI_COMM_WORLD);
+            MPI_Reduce(&dmin,&rdmin,1,MPI_DOUBLE,MPI_MIN,0,MPI_COMM_WORLD);
+
+
+            if (rank == 0){
+              //
+              // Computing statistical data
+              //
+              if (rnavg) {
+                absavg +=  rdavg/rnavg;
+                nabsavg++;
+              }
+              if (rdmin < absmin) absmin = rdmin;
             }
-         }
+          }
       MPI_Barrier(MPI_COMM_WORLD);
     }
     simulation_time = read_timer( ) - simulation_time;
