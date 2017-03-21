@@ -215,7 +215,7 @@ int main( int argc, char **argv )
         //
         //  save current step if necessary (slightly different semantics than in other codes)
         //
-        if( find_option( argc, argv, "-no" ) == -1 )
+        if( find_option( argc, argv, "-no" ) == -1  && rank == 0)
           if( fsave && (step%SAVEFREQ) == 0 )
             save( fsave, n, particles );
         //This save won't really work now that no thread has the entire view of the particles.
@@ -442,7 +442,7 @@ int main( int argc, char **argv )
     if (rank == 0) {  
       printf( "n = %d, simulation time = %g seconds", n, simulation_time);
 
-      if( find_option( argc, argv, "-no" ) == -1 )
+      if( find_option( argc, argv, "-no" ) == -1  && rank == 0)
       {
         if (nabsavg) absavg /= nabsavg;
       // 
