@@ -170,7 +170,7 @@ int main( int argc, char **argv )
     //  Create bins for local rows.
     //
 
-    particle_t* zippy = (particle_t*)malloc(sizeof(particle_t) * partition_offsets[n_proc]) ;
+    particle_t* zippy = (particle_t*)malloc(sizeof(particle_t) * partition_offsets[n_proc-1]) ;
     int first = min(  rank    * rows_per_proc, num_bin_row);
     int last  = min( (rank+1) * rows_per_proc, num_bin_row);
     first--;
