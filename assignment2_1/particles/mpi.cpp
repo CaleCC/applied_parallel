@@ -30,7 +30,7 @@ void create_bins(vector<particle_t> bins[], particle_t* particles, int n, int nu
     printf("from %d, Bins created\n", first);
 }
 //Partition particles into n_proc bins based on their row location. 
-void partition_bins(vector<particle_t> bins[], particle_t* particles, particle_t* particles_per_process, int n, int num_bin_row, int n_proc) {
+void partition_bins(vector<particle_t> bins[], particle_t* particles, int* particles_per_process, int n, int num_bin_row, int n_proc) {
     
     memset ( particles_per_process, 0, sizeof(int)*n_proc);
 
