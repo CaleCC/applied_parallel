@@ -301,7 +301,7 @@ int main( int argc, char **argv )
         if(rank == 0){
             biter = 0;
         }
-        endBins = local_bin_size+biter;
+        endBins = local_bin_size-biter;
 
         for (;biter < endBins; biter++)
         {//Insert logic here
@@ -373,7 +373,7 @@ int main( int argc, char **argv )
         if(rank == 0){
             biter = 0;
         }
-        endBins = local_bin_size+biter;
+        endBins = local_bin_size-biter;
 
         for(int i = 0; i < biter; i++){
             localBins[i].clear();
