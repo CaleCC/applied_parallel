@@ -215,6 +215,7 @@ int main( int argc, char **argv )
         if( find_option( argc, argv, "-no" ) == -1 )
           if( fsave && (step%SAVEFREQ) == 0 )
             save( fsave, n, particles );
+        //This save won't really work now that no thread has the entire view of the particles.
         
         //
         //  compute all forces
@@ -234,7 +235,7 @@ int main( int argc, char **argv )
             int particles_per_bin = binQ.size();
 
             for (int j = 0; j < particles_per_bin; j++) {
-                particles[biter].ax = particles[biter].ay = 0;
+                binQ[j].ax = binQ[j].ay = 0;
             }
             int location = biter;
             vector<int> x_range;
