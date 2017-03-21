@@ -300,7 +300,6 @@ int main( int argc, char **argv )
         if(rank == 0){
             biter = 0;
         }
-        if(rank == )
 
         for (;biter < last_real_bin; biter++)
         {//Insert logic here
