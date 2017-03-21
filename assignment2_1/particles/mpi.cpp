@@ -98,10 +98,9 @@ int main( int argc, char **argv )
     //
     //  allocate generic resources
     //
-    if(rank == 0){
-        FILE *fsave = savename && rank == 0 ? fopen( savename, "w" ) : NULL;
-        FILE *fsum = sumname && rank == 0 ? fopen ( sumname, "a" ) : NULL;
-    }
+    
+    FILE *fsave = savename && rank == 0 ? fopen( savename, "w" ) : NULL;
+    FILE *fsum = sumname && rank == 0 ? fopen ( sumname, "a" ) : NULL;
 
     particle_t *particles = (particle_t*) malloc( n * sizeof(particle_t) );
     partition_offsets = (int*) malloc(sizeof(int) * n_proc);
@@ -218,7 +217,7 @@ int main( int argc, char **argv )
         //
         //  save current step if necessary (slightly different semantics than in other codes)
         //
-        if( find_option( argc, argv, "-no" ) == -1  && rank == 0)
+        if( find_option( argc, argv, "-no" ) == -1)
           if( fsave && (step%SAVEFREQ) == 0 )
             save( fsave, n, particles );
         //This save won't really work now that no thread has the entire view of the particles.
