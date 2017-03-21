@@ -177,6 +177,7 @@ int main( int argc, char **argv )
     //
     int nlocal = 0;
     MPI_Scatter(num_partic_proc,1,MPI_INT,&nlocal,1,MPI_INT,0,MPI_COMM_WORLD);
+		printf( "scatter number of particles: %d\n",nlocal);
     particle_t *local = (particle_t*) malloc( nlocal * sizeof(particle_t) );
     vector< vector<particle_t*> > bins;
     create_bins(bins, bin_num);
