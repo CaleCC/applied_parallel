@@ -30,7 +30,8 @@ void create_bins(vector<vector<particle_t*> > &bins, int & num_bins) {
 
 //return the processors number according to the location of the particle
 int num_Proc(particle_t particle, int n_proc, double p_size_x, double p_size_y){
-  int location = floor(particle.x/p_size_x) + n_proc * floor(particle.y / p_size_y);
+  //int location = floor(particle.x/p_size_x) + n_proc * floor(particle.y / p_size_y);
+	  int location = floor(particle.x/p_size_x);
   return location;
 }
 
@@ -91,7 +92,7 @@ int main( int argc, char **argv )
     double p_size_y = p_bin_num_y * bin_size;
 
     //calculate the halo area of each rectangle
-    int halo_left = 0;//the area on halo the left
+    int halo_left = 0;//the  haloare on the left
     int halo_right = 0; // the halo area on the right
     if(rank%n_proc != 0){//not the left most one
       halo_left = 1;
@@ -121,7 +122,7 @@ int main( int argc, char **argv )
     MPI_Request req_r;
 
     //allocate resources for proc
-    particle_t *processor_particles = (particle_t*) malloc ( 2 * n * sizeof(particle_t));
+    //particle_t *processor_particles = (particle_t*) malloc ( 2 * n * sizeof(particle_t));
 
     //
     //  allocate generic resources
@@ -139,15 +140,15 @@ int main( int argc, char **argv )
     //
     //  set up the data partitioning across processors
     //
-    int particle_per_proc = 2*n / n_proc;
-    int *partition_offsets = (int*) malloc( (n_proc+1) * sizeof(int) );
+    int particle_per_proc = 2 * n / n_proc;
+    int *partition_offsets = (int*) malloc( n_proc * sizeof(int) );
 
     for( int i = 0; i < n_proc+1; i++ )
-        partition_offsets[i] = min( i * particle_per_proc, n );
+        partition_offsets[i] =  i * particle_per_proc;
 
     int *partition_sizes = (int*) malloc( n_proc * sizeof(int) );
     for( int i = 0; i < n_proc; i++ )
-        partition_sizes[i] = partition_offsets[i+1] - partition_offsets[i];
+        partition_sizes[i] = particle_per_proc;
 
 
 
@@ -179,13 +180,13 @@ int main( int argc, char **argv )
     particle_t *local = (particle_t*) malloc( nlocal * sizeof(particle_t) );
     vector< vector<particle_t*> > bins;
     create_bins(bins, bin_num);
-    MPI_Scatter(num_partic_proc,1,MPI_INT,&nlocal,1,MPI_INT,0,MPI_COMM_WORLD);
+    //MPI_Scatter(num_partic_proc,1,MPI_INT,&nlocal,1,MPI_INT,0,MPI_COMM_WORLD);
     MPI_Scatterv( assign_particles_to_p, partition_sizes, partition_offsets, PARTICLE, local, particle_per_proc, PARTICLE, 0, MPI_COMM_WORLD );
 
 
     // the offset that needs to be subtracted when calculating the location of bin where the particle stays in
     double off_set_x = rank%n_proc*p_size_x;
-    double off_set_y = rank/n_proc*p_size_y;
+    double off_set_y = 0;
 
     //  simulate a number of time steps
     //
