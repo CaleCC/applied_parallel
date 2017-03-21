@@ -341,7 +341,7 @@ int main( int argc, char **argv )
             for(int j = 0; j < howManyZips[i]; j++){
                 int x = floor(zippy[partition_offsets[i]+j].x / binsize);
                 int y = floor(zippy[partition_offsets[i]+j].y / binsize);
-                if( y >= first && y <= last )
+                if( y >= first && y < last )
                     localBins[x + (y-first) * num_bin_row].push_back(zippy[partition_offsets[i]+j]);
             }
         }
