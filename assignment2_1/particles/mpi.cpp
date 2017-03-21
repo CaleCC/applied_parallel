@@ -105,10 +105,10 @@ int main( int argc, char **argv )
     int bin_num = num_bin_row * (proc_bin_width); //the number of bins in each processor
 
     //set up the buffer to send and receive data in halo
-    particle_t *send_l = (particle_t*) malloc( 4*num_bin_row*sizeof(particle_t));
-    particle_t *send_r = (particle_t*) malloc( 4*num_bin_row*sizeof(particle_t));
-    particle_t *receive_l = (particle_t*) malloc( 4*num_bin_row*sizeof(particle_t));
-    particle_t *receive_r = (particle_t*) malloc( 4*num_bin_row*sizeof(particle_t));
+    particle_t *send_l = (particle_t*) malloc( 3*num_bin_row*sizeof(particle_t));
+    particle_t *send_r = (particle_t*) malloc( 3*num_bin_row*sizeof(particle_t));
+    particle_t *receive_l = (particle_t*) malloc( 3*num_bin_row*sizeof(particle_t));
+    particle_t *receive_r = (particle_t*) malloc( 3*num_bin_row*sizeof(particle_t));
     int send_l_count = 0;
     int send_r_count = 0;
     int rec_l_count = 0;
