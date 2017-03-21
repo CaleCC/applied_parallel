@@ -104,6 +104,7 @@ int main( int argc, char **argv )
     particle_t *particles = (particle_t*) malloc( n * sizeof(particle_t) );
     partition_offsets = (int*) malloc(sizeof(int) * n_proc);
     partition_sizes = (int*) malloc(sizeof(int)*n_proc);
+    particle_t* zippy = (particle_t*)malloc(sizeof(particle_t) * n) ;
 
     vector<particle_t> bins[n_proc];
     
@@ -293,7 +294,6 @@ int main( int argc, char **argv )
         vector<particle_t> moveUp;
         vector<particle_t> moveDown;
         vector<particle_t> temp_move;
-        particle_t zippy[n];
         vector<particle_t> localzip;
         int ob1 = -num_bin_row*rows_per_proc;
         int ob2 = (last_real_bin+ num_bin_row);
@@ -500,6 +500,7 @@ int main( int argc, char **argv )
     free( fromBelow );
     free( movingup );
     free( movingdown );
+    free( zippy );
     if(rank == 0){
         free( sendBuf );
     }
