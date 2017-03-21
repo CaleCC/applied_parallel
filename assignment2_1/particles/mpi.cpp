@@ -227,7 +227,7 @@ int main( int argc, char **argv )
         if(rank == 0){
             biter = 0;
         }
-        int endBins = local_bin_size+biter;
+        int endBins = local_bin_size-biter; //Localbinsize includes the halo region.
         //  Do one set of computations for each bin.
         for (; biter < endBins; biter++)
         {
