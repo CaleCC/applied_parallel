@@ -357,7 +357,7 @@ int main( int argc, char **argv )
         //
       for( int i = 0; i < nlocal; i++ )
           move( local[i] );
-
+			printf( "proc %d finished move\n",rank);
       //check particles that has left current processor
       send_r_count = 0;
       send_l_count = 0;
@@ -382,6 +382,7 @@ int main( int argc, char **argv )
             i--;
           }
       }
+			printf( "proc %d finished check left particles\n",rank);
       //receive number of particles to join
       if(halo_left) MPI_Irecv(&rec_l_count, 1, MPI_INT, rank-1,rank,MPI_COMM_WORLD,&rec_req_l);
       if(halo_right) MPI_Irecv(&rec_r_count, 1, MPI_INT,rank+1,rank,MPI_COMM_WORLD,&rec_req_r);
@@ -416,7 +417,7 @@ int main( int argc, char **argv )
       if(halo_right&&rec_r_count){
         MPI_Wait(&rec_req_r,&r_st_r);
       }
-
+			printf( "proc %d finished send left particles\n",rank);
       //add those received particles to local array
       for(int i = 0; i < rec_l_count;i++){
         local[nlocal] = receive_l[i];
@@ -426,6 +427,7 @@ int main( int argc, char **argv )
         local[nlocal] = receive_r[i];
         nlocal++;
       }
+			printf( "proc %d finished add new particles to local\n",rank);
 			if( find_option( argc, argv, "-no" ) == -1 ){
 					if( (step%SAVEFREQ) == 0 )
 				{
@@ -446,8 +448,9 @@ int main( int argc, char **argv )
 				}
 			 }
 
-
+			 
       MPI_Barrier(MPI_COMM_WORLD);
+			printf( "proc %d one step complete\n",rank);
     }
     simulation_time = read_timer( ) - simulation_time;
 
