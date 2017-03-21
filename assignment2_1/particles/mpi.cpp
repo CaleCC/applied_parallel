@@ -234,7 +234,7 @@ int main( int argc, char **argv )
         //receive the number of particle from neighbour
 
         rec_r_count = 0;
-				rec_r_count = 0;
+				rec_l_count = 0;
         if(halo_left){
           MPI_Irecv(&rec_l_count,1,MPI_INT,rank-1,rank,MPI_COMM_WORLD,&rec_req_l);
         }
@@ -255,11 +255,13 @@ int main( int argc, char **argv )
          //wait for receive of those numbers
          if(halo_left){
            MPI_Wait(&rec_req_l,&r_st_l);
+					  printf( "proc %d   receive count left %d\n",rank,rec_l_count);
          }
          if(halo_right){
            MPI_Wait(&rec_req_r, &r_st_r);
+					 printf( "proc %d   receive count right %d\n",rank,rec_l_count);
          }
-
+				 printf( "proc %d spoped  receive count\n",rank);
 
         //receive for halo area
         if(halo_left && rec_l_count){
@@ -284,7 +286,7 @@ int main( int argc, char **argv )
         if(halo_right&&rec_r_count){
           MPI_Wait(&rec_req_r,&r_st_r);
         }
-
+				 printf( "proc %d spoped  receive halo area\n",rank);
 
         //push the received particles in halo area into the bins
         for(int i = 0; i < rec_l_count; i++){
@@ -330,6 +332,7 @@ int main( int argc, char **argv )
           }
         }
       }
+			 printf( "proc %d finished force compute\n",rank);
 			if( find_option( argc, argv, "-no" ) == -1 ){
 				MPI_Reduce(&davg,&rdavg,1,MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
 				MPI_Reduce(&navg,&rnavg,1,MPI_INT,MPI_SUM,0,MPI_COMM_WORLD);
