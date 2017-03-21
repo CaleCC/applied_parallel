@@ -293,7 +293,11 @@ int main( int argc, char **argv )
         vector<particle_t> moveUp;
         vector<particle_t> moveDown;
         vector<particle_t> temp_move;
-
+        particle_t zippy[n];
+        vector<particle_t> localzip;
+        int ob1 = -num_bin_row*rows_per_proc;
+        int ob2 = (last_real_bin+ num_bin_row);
+        int zip = 0;
         for (int biter = first_real_bin; biter < last_real_bin; biter++)
         {//Insert logic here
             vector<particle_t> binQ = localBins[biter];
@@ -307,7 +311,11 @@ int main( int argc, char **argv )
                 int loc = (y-first) * num_bin_row + x;
                 if (loc != biter)
                 {
-                    if(loc < num_bin_row)
+                    if (loc < ob1 || loc > ob2 ){
+                        localzip.push_back(binQ[p]);
+                        zip++;
+                    }
+                    else if(loc < num_bin_row)
                         moveUp.push_back(binQ[p]);
                     else if(loc > last_real_bin)
                         moveDown.push_back(binQ[p]);
@@ -325,6 +333,20 @@ int main( int argc, char **argv )
             localBins[biter] = binQ;
         }
         MPI_Barrier(MPI_COMM_WORLD);
+        //Handle the zippy particles first.
+        int howManyZips[n_proc];
+        MPI_Allgatherv(localzip.size(), n, PARTICLE, zippy, partition_sizes, partition_offsets, PARTICLE, MPI_COMM_WORLD);
+        MPI_Allgather(zip, 1, MPI_INT, howManyZips, 1, PARTICLE, MPI_COMM_WORLD);
+        for(int i = 0; i < n_proc; i++){
+            for(int j = 0; j < howManyZips[i]; j++){
+                int x = floor(zippy[partition_offsets[i]+j].x / binsize);
+                int y = floor(zippy[partition_offsets[i]+j].y / binsize);
+                if( y >= first && y <= last )
+                    localBins[x + (y-first) * num_bin_row].push_back(zippy[partition_offsets[i]+j]);
+            }
+        }
+
+
         int fa, fb;
         fa = fb = 0;
         if(rank > 0){
