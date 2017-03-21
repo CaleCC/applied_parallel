@@ -30,8 +30,8 @@ void create_bins(vector<particle_t> bins[], particle_t* particles, int n, int nu
     printf("from %d, Bins created\n", first);
 }
 //Partition particles into n_proc bins based on their row location. 
-int* partition_bins(vector<particle_t> bins[], particle_t* particles, int n, int num_bin_row, int n_proc) {
-    int* particles_per_process = (int*) malloc(sizeof(int)*n_proc);
+void partition_bins(vector<particle_t> bins[], particle_t* particles, particle_t* particles_per_process, int n, int num_bin_row, int n_proc) {
+    
     memset ( particles_per_process, 0, sizeof(int)*n_proc);
 
     int num_bins = num_bin_row * num_bin_row;
@@ -108,6 +108,7 @@ int main( int argc, char **argv )
 
     particle_t *particles = (particle_t*) malloc( n * sizeof(particle_t) );
     partition_offsets = (int*) malloc(sizeof(int) * n_proc+1);
+    particles_per_process = (int*) malloc(sizeof(int)*n_proc);
 
     vector<particle_t> bins[n_proc];
     
@@ -132,7 +133,7 @@ int main( int argc, char **argv )
         //partition_bins will sort the particles into n_proc bins, based on their bin row index
         //While we do this, we want to also count the number of particles in each level;
         //We use this info to malloc a particle_t array to scatterv across all processes.
-        partition_sizes = partition_bins(bins, particles, n, num_bin_row, n_proc);
+        partition_sizes = partition_bins(bins, particles, particles_per_process, n, num_bin_row, n_proc);
         int totalSize = 0;
         partition_offsets[0] = 0;
         for (int i = 0; i < n_proc; i++){
