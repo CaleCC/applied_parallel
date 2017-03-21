@@ -292,6 +292,7 @@ int main( int argc, char **argv )
         //  must now be sent to the relevant folks.
         vector<particle_t> moveUp;
         vector<particle_t> moveDown;
+        vector<particle_t> temp_move;
 
         for (int biter = first_real_bin; biter < last_real_bin; biter++)
         {//Insert logic here
@@ -303,12 +304,16 @@ int main( int argc, char **argv )
 
                 int x = floor(binQ[p].x / binsize);
                 int y = floor(binQ[p].y / binsize);
-                if (y * num_bin_row + x != biter)
+                int loc = (y-first) * num_bin_row + x;
+                if (loc != biter)
                 {
-                    if(biter < num_bin_row)
+                    if(loc < num_bin_row)
                         moveUp.push_back(binQ[p]);
-                    else 
+                    else if(loc > last_real_bin)
                         moveDown.push_back(binQ[p]);
+                    else{
+                        temp_move.push_back(binQ[p]);
+                    }
 
                     binQ.erase(binQ.begin() + p);
                     size--;
@@ -422,6 +427,13 @@ int main( int argc, char **argv )
                 int y = floor(fromBelow[j].y / binsize);
                 localBins[x + (y-first) * num_bin_row].push_back(fromBelow[j]);
             }
+        //We also have to rebin the particles we moved within our region.
+            int tempmovesize = temp_move.size();
+        for(int j = 0; j < tempmovesize; j++){
+            int x = floor(temp_move[j].x / binsize);
+            int y = floor(temp_move[j].y / binsize);
+            localBins[x + (y-first) * num_bin_row].push_back(temp_move[j]);
+        }
         MPI_Barrier(MPI_COMM_WORLD);
 //End of time step.
     }
