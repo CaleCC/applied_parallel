@@ -19,7 +19,7 @@ using namespace std;
 //
 //create bins with length of cutoff
 //
-void create_bins(vector<particle_t> &bins[], particle_t* particles, int n, int num_bin_row, int first) {
+void create_bins(vector<particle_t> bins[], particle_t* particles, int n, int num_bin_row, int first) {
 
     //put particles in bins according to their locations
     for (int j = 0; j < n; j++) {
@@ -30,13 +30,13 @@ void create_bins(vector<particle_t> &bins[], particle_t* particles, int n, int n
     printf("from %d, Bins created\n", first);
 }
 //Partition particles into n_proc bins based on their row location. 
-int* partition_bins(vector<particle_t> &bins[], particle_t* particles, int n, int num_bin_row, int n_proc) {
+int* partition_bins(vector<particle_t> bins[], particle_t* particles, int n, int num_bin_row, int n_proc) {
     int* particles_per_process = (int*) malloc(sizeof(int)*n_proc);
     memset ( particles_per_process, 0, sizeof(int)*n_proc);
 
     int num_bins = num_bin_row * num_bin_row;
     int rows_per_proc = (num_bin_row + n_proc -1) / n_proc;
-    bins.resize(n_proc);
+    //bins.resize(n_proc);
     //put particles in bins according to their locations
     for (int j = 0; j < n; j++) {
         //int x = floor(particles[j].x / binsize);
