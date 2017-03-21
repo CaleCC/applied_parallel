@@ -171,11 +171,16 @@ int main( int argc, char **argv )
     //
     int first = min(  rank    * rows_per_proc, num_bin_row);
     int last  = min( (rank+1) * rows_per_proc, num_bin_row);
-    int bins_proc = last - first +2; //General case
-
-    if(rank == 0 || rank == n_proc){
-        bins_proc--; //On the top and bottom, we will have one less row (smaller halo)
+    first--;
+    last++;
+    if(rank == 0){
+        first++; //On the top and bottom, we will have one less row (smaller halo)
     }
+    else if(rank == n_proc){
+        last--;
+    }
+    int bins_proc = last - first; //General case
+
     int local_bin_size = bins_proc * num_bin_row;
 
     vector<particle_t> localBins[local_bin_size];
