@@ -474,12 +474,13 @@ int main( int argc, char **argv )
     free( partition_sizes );
     free( local );
     free( particles );
-    free( sendBuf );
     free( fromAbove );
     free( fromBelow );
     free( movingup );
     free( movingdown );
-
+    if(rank == 0){
+        free( sendBuf );
+    }
 
     if( fsave )
         fclose( fsave );
