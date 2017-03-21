@@ -500,7 +500,7 @@ int main( int argc, char **argv )
     free( fromBelow );
     free( movingup );
     free( movingdown );
-    free( zippy );
+    //free( zippy );
     if(rank == 0){
         free( sendBuf );
     }
