@@ -260,6 +260,8 @@ int main( int argc, char **argv )
                     }
                 }
             }
+
+            localBins[biter] = binQ;
         }
         MPI_Barrier(MPI_COMM_WORLD);
         if( find_option( argc, argv, "-no" ) == -1 )
@@ -314,6 +316,7 @@ int main( int argc, char **argv )
                     p++;
                 }
             }
+            localBins[biter] = binQ;
         }
         MPI_Barrier(MPI_COMM_WORLD);
         int fa, fb;
