@@ -336,6 +336,7 @@ int main( int argc, char **argv )
         
         //Handle the zippy particles first.
         int howManyZips[n_proc];
+        MPI_Barrier(MPI_COMM_WORLD);
         MPI_Allgatherv(localzip.data(), zip, PARTICLE, zippy, partition_sizes, partition_offsets, PARTICLE, MPI_COMM_WORLD);
         MPI_Allgather(&zip, 1, MPI_INT, howManyZips, 1, MPI_INT, MPI_COMM_WORLD);
         for(int i = 0; i < n_proc; i++){
