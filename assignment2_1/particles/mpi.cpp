@@ -384,7 +384,7 @@ int main( int argc, char **argv )
             i--;
           }
       }
-			rintf( "proc %d finished check the moved particles \n",rank);
+			printf("proc %d finished check the moved particles \n",rank);
 			if(halo_left){
 				MPI_Irecv(&rec_l_count,1,MPI_INT,rank-1,rank,MPI_COMM_WORLD,&rec_req_l);
 			}
