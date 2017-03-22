@@ -171,6 +171,7 @@ int main( int argc, char **argv )
     //
 
     particle_t* zippy = (particle_t*)malloc(sizeof(particle_t) * partition_offsets[n_proc-1]) ;
+    int* howManyZips = (int*) malloc(sizeof(int)*n_proc);
     int first = min(  rank    * rows_per_proc, num_bin_row);
     int last  = min( (rank+1) * rows_per_proc, num_bin_row);
     first--;
@@ -336,7 +337,6 @@ int main( int argc, char **argv )
         }
         
         //Handle the zippy particles first.
-        int howManyZips[n_proc];
         MPI_Barrier(MPI_COMM_WORLD);        
         MPI_Allgather(&zip, 1, MPI_INT, howManyZips, 1, MPI_INT, MPI_COMM_WORLD);
         MPI_Allgatherv(localzip.data(), zip, PARTICLE, zippy, howManyZips, partition_offsets, PARTICLE, MPI_COMM_WORLD);
@@ -503,6 +503,7 @@ int main( int argc, char **argv )
     free( fromBelow );
     free( movingup );
     free( movingdown );
+    free( howManyZips );
     free( zippy );
     if(rank == 0){
         free( sendBuf );
