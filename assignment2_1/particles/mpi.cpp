@@ -321,7 +321,7 @@ int main( int argc, char **argv )
                 if (loc != biter)
                 {
                     if (loc < ob1 || loc > ob2 ){
-                        if(zip > partition_sizes[rank]){
+                        if(zip > n/2){
                             printf("Error, buffer overflow localzip\n");
                             return -1;
                         }
