@@ -170,7 +170,12 @@ int main( int argc, char **argv )
     //  Create bins for local rows.
     //
 
-    particle_t* zippy = (particle_t*)malloc(sizeof(particle_t) * partition_offsets[n_proc-1]) ;
+    particle_t* zippy = (particle_t*)malloc(sizeof(particle_t) * n * n_proc/2) ;
+    int* zipoff = (int*) malloc(sizeof(int) * n_proc);
+    zipoff[0] = 0;
+    for(int i = 1; i < n_proc-1; i++){
+        zipoff[i] = zipoff[i-1] + n/2;
+    }
     int* howManyZips = (int*) malloc(sizeof(int)*n_proc);
     particle_t* localzip = (particle_t*)malloc(sizeof(particle_t) * partition_sizes[rank]) ;
     int first = min(  rank    * rows_per_proc, num_bin_row);
@@ -344,19 +349,19 @@ int main( int argc, char **argv )
         //Handle the zippy particles first.
         MPI_Barrier(MPI_COMM_WORLD);        
         MPI_Allgather(&zip, 1, MPI_INT, howManyZips, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Allgatherv(localzip, zip, PARTICLE, zippy, howManyZips, partition_offsets, PARTICLE, MPI_COMM_WORLD);
+        MPI_Allgatherv(localzip, zip, PARTICLE, zippy, howManyZips, zipoff, PARTICLE, MPI_COMM_WORLD);
 
         for(int i = 0; i < n_proc; i++){
-                if(howManyZips[i] > partition_sizes[i]){
+                if(howManyZips[i] > n/2){
                     printf("Error, buffer overflow.\n");
                     return -1;
                 }
             for(int j = 0; j < howManyZips[i]; j++){
-                int x = floor(zippy[partition_offsets[i]+j].x / binsize);
-                int y = floor(zippy[partition_offsets[i]+j].y / binsize);
+                int x = floor(zippy[zipoff[i]+j].x / binsize);
+                int y = floor(zippy[zipoff[i]+j].y / binsize);
                 int biq = x + (y-first) * num_bin_row;
                 if( biq >= first_real_bin && biq < last_real_bin)
-                    localBins[x + (y-first) * num_bin_row].push_back(zippy[partition_offsets[i]+j]);
+                    localBins[x + (y-first) * num_bin_row].push_back(zippy[zipoff[i]+j]);
             }
         }
         MPI_Barrier(MPI_COMM_WORLD);
@@ -545,6 +550,7 @@ int main( int argc, char **argv )
     free( howManyZips );
     free( zippy );
     free( localzip );
+    free( zipoff );
     if(rank == 0){
         free( sendBuf );
         if( fsave )
