@@ -177,7 +177,7 @@ int main( int argc, char **argv )
         zipoff[i] = zipoff[i-1] + n/2;
     }
     int* howManyZips = (int*) malloc(sizeof(int)*n_proc);
-    particle_t* localzip = (particle_t*)malloc(sizeof(particle_t) * partition_sizes[rank]) ;
+    particle_t* localzip = (particle_t*)malloc(sizeof(particle_t) * n/2) ;
     int first = min(  rank    * rows_per_proc, num_bin_row);
     int last  = min( (rank+1) * rows_per_proc, num_bin_row);
     first--;
