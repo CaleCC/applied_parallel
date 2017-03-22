@@ -409,7 +409,7 @@ int main( int argc, char **argv )
 			 }
 			 if(halo_right){
 				 MPI_Isend(&send_r_count,1,MPI_INT,rank+1,rank+1,MPI_COMM_WORLD,&req_rn);
-				 printf("proc %d post to send right \n",rank);
+				 printf("proc %d post to send right %d\n",rank,send_r_count);
 			 }
 
 
