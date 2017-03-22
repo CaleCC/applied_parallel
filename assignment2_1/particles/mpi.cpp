@@ -426,6 +426,7 @@ int main( int argc, char **argv )
 			 }
 
 			printf( "proc %d   ready to area\n",rank);
+			MPI_Barrier(MPI_COMM_WORLD);
       //receive for halo area
       if(halo_left && rec_l_count){
         MPI_Irecv(receive_l,rec_l_count,PARTICLE,rank-1,rank,MPI_COMM_WORLD,&rec_req_l);
@@ -462,26 +463,26 @@ int main( int argc, char **argv )
 			printf( "proc %d finished add new particles to local\n",rank);
 			if( find_option( argc, argv, "-no" ) == -1 ){
 					if( (step%SAVEFREQ) == 0 )
-				{
-				MPI_Gather(&nlocal,1,MPI_INT,num_partic_proc,1,MPI_INT,0,MPI_COMM_WORLD);
-				if (rank == 0)
-				{
-					int tmp_nsum=0;
-					for(int i=0;i<n_proc;i++)
 					{
-						partition_offsets[i]=tmp_nsum;
-						tmp_nsum+=num_partic_proc[i];
+					MPI_Gather(&nlocal,1,MPI_INT,num_partic_proc,1,MPI_INT,0,MPI_COMM_WORLD);
+					if (rank == 0)
+					{
+						int tmp_nsum=0;
+						for(int i=0;i<n_proc;i++)
+						{
+							partition_offsets[i]=tmp_nsum;
+							tmp_nsum+=num_partic_proc[i];
+						}
 					}
-				}
 
-				MPI_Gatherv( local, nlocal, PARTICLE, particles,num_partic_proc, partition_offsets, PARTICLE,0, MPI_COMM_WORLD );
-				if (rank == 0)
-					save( fsave, n, particles );
-				}
+					MPI_Gatherv( local, nlocal, PARTICLE, particles,num_partic_proc, partition_offsets, PARTICLE,0, MPI_COMM_WORLD );
+					if (rank == 0)
+						save( fsave, n, particles );
+					}
 			 }
 
 
-
+			MPI_Barrier(MPI_COMM_WORLD);
 			printf( "proc %d one step complete\n",rank);
     }
     simulation_time = read_timer( ) - simulation_time;
