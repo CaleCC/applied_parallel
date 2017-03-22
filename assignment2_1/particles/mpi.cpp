@@ -405,7 +405,7 @@ int main( int argc, char **argv )
 			//send the number of particles to neighbour
 			 if(halo_left){
 				 MPI_Isend(&send_l_count,1,MPI_INT,rank-1,rank-1,MPI_COMM_WORLD,&req_ln);
-				 printf("proc %d post to send left \n",rank);
+				 printf("proc %d post to send left %d \n",rank,send_l_count);
 			 }
 			 if(halo_right){
 				 MPI_Isend(&send_r_count,1,MPI_INT,rank+1,rank+1,MPI_COMM_WORLD,&req_rn);
@@ -417,17 +417,15 @@ int main( int argc, char **argv )
 			 //wait for receive of those numbers
 			 if(halo_right){
 				 MPI_Wait(&rec_req_rn, &r_st_rn);
-				 printf( "after move proc %d   receive count from right %d\n",rank,rec_r_count);
+				 printf( " proc %d   receive count from right %d\n",rank,rec_r_count);
 			 }
 			 if(halo_left){
 				 if(rank == 1) printf("proc %d wait left wrong? \n",rank);
 				 MPI_Wait(&rec_req_ln,&r_st_ln);
-					printf( "after move proc %d   receive count from left %d\n",rank,rec_l_count);
+					printf( "proc %d   receive count from left %d\n",rank,rec_l_count);
 			 }
 
-			printf( "proc %d stopped  receive count\n",rank);
-
-			printf( "proc %d actually received\n",rank);
+			printf( "proc %d   ready to area\n",rank);
       //receive for halo area
       if(halo_left && rec_l_count){
         MPI_Irecv(receive_l,rec_l_count,PARTICLE,rank-1,rank,MPI_COMM_WORLD,&rec_req_l);
