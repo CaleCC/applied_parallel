@@ -320,7 +320,7 @@ int main( int argc, char **argv )
                             printf("Error, buffer overflow localzip\n");
                             return -1;
                         }
-                        localzip[zip] = binQ[p]
+                        localzip[zip] = binQ[p];
                         zip++;
                     }
                     else if(loc < num_bin_row)
@@ -344,7 +344,7 @@ int main( int argc, char **argv )
         //Handle the zippy particles first.
         MPI_Barrier(MPI_COMM_WORLD);        
         MPI_Allgather(&zip, 1, MPI_INT, howManyZips, 1, MPI_INT, MPI_COMM_WORLD);
-        MPI_Allgatherv(localzip.data(), zip, PARTICLE, zippy, howManyZips, partition_offsets, PARTICLE, MPI_COMM_WORLD);
+        MPI_Allgatherv(localzip, zip, PARTICLE, zippy, howManyZips, partition_offsets, PARTICLE, MPI_COMM_WORLD);
 
         for(int i = 0; i < n_proc; i++){
                 if(howManyZips[i] > partition_sizes[i]){
