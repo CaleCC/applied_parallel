@@ -383,11 +383,23 @@ int main( int argc, char **argv )
         for(int i = 0; i < fa; i++){
             int x = floor(fromAbove[i].x / binsize);
             int y = floor(fromAbove[i].y / binsize);
+            int ob1 = -num_bin_row*rows_per_proc;
+            int ob2 = (last_real_bin+ num_bin_row);
+            int loc = (y-first) * num_bin_row + x;
+            if (loc < ob1 || loc > ob2 )
+                printf("rank %d out of bounds0 \n", rank);
+            else
             localBins[x + (y-first) * num_bin_row].push_back(fromAbove[i]);
         }
         for(int i = 0; i < fb; i++){
             int x = floor(fromBelow[i].x / binsize);
             int y = floor(fromBelow[i].y / binsize);
+            int ob1 = -num_bin_row*rows_per_proc;
+            int ob2 = (last_real_bin+ num_bin_row);
+            int loc = (y-first) * num_bin_row + x;
+            if (loc < ob1 || loc > ob2 )
+                printf("rank %d out of bounds1 \n", rank);
+            else
             localBins[x + (y-first) * num_bin_row].push_back(fromBelow[i]);
         }
 
@@ -455,12 +467,24 @@ int main( int argc, char **argv )
             for (int j = 0; j < fa; j++) {
                 int x = floor(fromAbove[j].x / binsize);
                 int y = floor(fromAbove[j].y / binsize);
+                int ob1 = -num_bin_row*rows_per_proc;
+                int ob2 = (last_real_bin+ num_bin_row);
+                int loc = (y-first) * num_bin_row + x;
+                if (loc < ob1 || loc > ob2 )
+                    printf("rank %d out of bounds2 \n", rank);
+                else
                 localBins[x + (y-first) * num_bin_row].push_back(fromAbove[j]);
             }
         if(rank < n_proc-1)
             for (int j = 0; j < fb; j++) {
                 int x = floor(fromBelow[j].x / binsize);
                 int y = floor(fromBelow[j].y / binsize);
+                int ob1 = -num_bin_row*rows_per_proc;
+                int ob2 = (last_real_bin+ num_bin_row);
+                int loc = (y-first) * num_bin_row + x;
+                if (loc < ob1 || loc > ob2 )
+                    printf("rank %d out of bounds3 \n", rank);
+                else
                 localBins[x + (y-first) * num_bin_row].push_back(fromBelow[j]);
             }
         //We also have to rebin the particles we moved within our region.
@@ -468,6 +492,12 @@ int main( int argc, char **argv )
         for(int j = 0; j < tempmovesize; j++){
             int x = floor(temp_move[j].x / binsize);
             int y = floor(temp_move[j].y / binsize);
+            int ob1 = -num_bin_row*rows_per_proc;
+            int ob2 = (last_real_bin+ num_bin_row);
+            int loc = (y-first) * num_bin_row + x;
+            if (loc < ob1 || loc > ob2 )
+                printf("rank %d out of bounds4 \n", rank);
+            else
             localBins[x + (y-first) * num_bin_row].push_back(temp_move[j]);
         }
         MPI_Barrier(MPI_COMM_WORLD);
