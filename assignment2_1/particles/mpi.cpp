@@ -13,7 +13,7 @@
 #define cutoff  0.01
 #define min_r   (cutoff/100)
 #define dt      0.0005
-#define binsize (cutoff)
+#define binsize (cutoff*4)
 
 using namespace std;
 //
