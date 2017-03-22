@@ -172,6 +172,7 @@ int main( int argc, char **argv )
 
     particle_t* zippy = (particle_t*)malloc(sizeof(particle_t) * partition_offsets[n_proc-1]) ;
     int* howManyZips = (int*) malloc(sizeof(int)*n_proc);
+    particle_t* localzip = (particle_t*)malloc(sizeof(particle_t) * partition_sizes[rank]) ;
     int first = min(  rank    * rows_per_proc, num_bin_row);
     int last  = min( (rank+1) * rows_per_proc, num_bin_row);
     first--;
@@ -297,7 +298,7 @@ int main( int argc, char **argv )
         vector<particle_t> moveUp;
         vector<particle_t> moveDown;
         vector<particle_t> temp_move;
-        vector<particle_t> localzip;
+        
         int ob1 = -num_bin_row*rows_per_proc;
         int ob2 = (last_real_bin+ num_bin_row);
         int zip = 0;
@@ -315,7 +316,11 @@ int main( int argc, char **argv )
                 if (loc != biter)
                 {
                     if (loc < ob1 || loc > ob2 ){
-                        localzip.push_back(binQ[p]);
+                        if(zip > partition_sizes[rank]){
+                            printf("Error, buffer overflow localzip\n");
+                            return -1;
+                        }
+                        localzip[zip] = binQ[p]
                         zip++;
                     }
                     else if(loc < num_bin_row)
@@ -342,8 +347,10 @@ int main( int argc, char **argv )
         MPI_Allgatherv(localzip.data(), zip, PARTICLE, zippy, howManyZips, partition_offsets, PARTICLE, MPI_COMM_WORLD);
 
         for(int i = 0; i < n_proc; i++){
-                if(howManyZips[i] > partition_sizes[i])
+                if(howManyZips[i] > partition_sizes[i]){
                     printf("Error, buffer overflow.\n");
+                    return -1;
+                }
             for(int j = 0; j < howManyZips[i]; j++){
                 int x = floor(zippy[partition_offsets[i]+j].x / binsize);
                 int y = floor(zippy[partition_offsets[i]+j].y / binsize);
@@ -507,6 +514,7 @@ int main( int argc, char **argv )
     free( movingdown );
     free( howManyZips );
     free( zippy );
+    free( localzip );
     if(rank == 0){
         free( sendBuf );
         if( fsave )
