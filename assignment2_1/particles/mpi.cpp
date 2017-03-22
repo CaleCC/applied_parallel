@@ -397,12 +397,13 @@ int main( int argc, char **argv )
 			//send the number of particles to neighbour
 			 if(halo_left){
 				 MPI_Isend(&send_l_count,1,MPI_INT,rank-1,rank-1,MPI_COMM_WORLD,&req_l);
+				 printf("proc %d post to send left \n",rank);
 			 }
-			 if(rank == 1) printf("proc %d post to send left \n",rank);
 			 if(halo_right){
 				 MPI_Isend(&send_r_count,1,MPI_INT,rank+1,rank+1,MPI_COMM_WORLD,&req_r);
+				 printf("proc %d post to send right \n",rank);
 			 }
-			 if(rank == 1) printf("proc %d post to send right \n",rank);
+
 
 
 			 //wait for receive of those numbers
