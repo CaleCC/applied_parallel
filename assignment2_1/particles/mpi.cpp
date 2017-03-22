@@ -342,6 +342,8 @@ int main( int argc, char **argv )
         MPI_Allgatherv(localzip.data(), zip, PARTICLE, zippy, howManyZips, partition_offsets, PARTICLE, MPI_COMM_WORLD);
 
         for(int i = 0; i < n_proc; i++){
+                if(howManyZips[i] > partition_sizes[i])
+                    printf("Error, buffer overflow.\n");
             for(int j = 0; j < howManyZips[i]; j++){
                 int x = floor(zippy[partition_offsets[i]+j].x / binsize);
                 int y = floor(zippy[partition_offsets[i]+j].y / binsize);
