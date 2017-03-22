@@ -262,6 +262,8 @@ int main( int argc, char **argv )
 					 printf( "proc %d   receive count right %d\n",rank,rec_l_count);
          }
 				 printf( "proc %d spoped  receive count\n",rank);
+				 MPI_Barrier(MPI_COMM_WORLD);
+
 
         //receive for halo area
         if(halo_left && rec_l_count){
@@ -286,6 +288,7 @@ int main( int argc, char **argv )
         if(halo_right&&rec_r_count){
           MPI_Wait(&rec_req_r,&r_st_r);
         }
+				MPI_Barrier(MPI_COMM_WORLD);
 				 printf( "proc %d spoped  receive halo area\n",rank);
 
         //push the received particles in halo area into the bins
