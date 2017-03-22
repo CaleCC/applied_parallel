@@ -94,10 +94,10 @@ int main( int argc, char **argv )
     //calculate the halo area of each rectangle
     int halo_left = 0;//the  haloare on the left
     int halo_right = 0; // the halo area on the right
-    if(rank%n_proc != 0){//not the left most one
+    if(rank != 0){//not the left most one
       halo_left = 1;
     }
-    if(rank%n_proc != n_proc - 1){//not the right most one
+    if(rank != n_proc - 1){//not the right most one
       halo_right = 1;
     }
     int proc_bin_width = halo_right+halo_left+p_bin_num_x;
@@ -417,7 +417,7 @@ int main( int argc, char **argv )
 					printf( "after move proc %d   receive count from left %d\n",rank,rec_l_count);
 			 }
 
-			printf( "proc %d spoped  receive count\n",rank);
+			printf( "proc %d stopped  receive count\n",rank);
 
 			printf( "proc %d actually received\n",rank);
       //receive for halo area
