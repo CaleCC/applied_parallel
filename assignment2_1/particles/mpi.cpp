@@ -384,23 +384,31 @@ int main( int argc, char **argv )
             i--;
           }
       }
+			MPI_Request rec_req_ln;
+			MPI_Request rec_req_rn;
+			MPI_Status r_st_ln;
+			MPI_Status r_st_rn;
+			MPI_Request req_ln;
+			MPI_Request req_rn;
+
+
 			printf("proc %d finished check the moved particles \n",rank);
 			if(halo_left){
-				MPI_Irecv(&rec_l_count,1,MPI_INT,rank-1,rank,MPI_COMM_WORLD,&rec_req_l);
+				MPI_Irecv(&rec_l_count,1,MPI_INT,rank-1,rank,MPI_COMM_WORLD,&rec_req_ln);
 			}
 			if(rank == 1) printf("proc %d post for receive left \n",rank);
 			if(halo_right){
-				MPI_Irecv(&rec_r_count,1,MPI_INT,rank+1,rank,MPI_COMM_WORLD,&rec_req_r);
+				MPI_Irecv(&rec_r_count,1,MPI_INT,rank+1,rank,MPI_COMM_WORLD,&rec_req_rn);
 			}
 			if(rank == 1) printf("proc %d post for receive right \n",rank);
 
 			//send the number of particles to neighbour
 			 if(halo_left){
-				 MPI_Isend(&send_l_count,1,MPI_INT,rank-1,rank-1,MPI_COMM_WORLD,&req_l);
+				 MPI_Isend(&send_l_count,1,MPI_INT,rank-1,rank-1,MPI_COMM_WORLD,&req_ln);
 				 printf("proc %d post to send left \n",rank);
 			 }
 			 if(halo_right){
-				 MPI_Isend(&send_r_count,1,MPI_INT,rank+1,rank+1,MPI_COMM_WORLD,&req_r);
+				 MPI_Isend(&send_r_count,1,MPI_INT,rank+1,rank+1,MPI_COMM_WORLD,&req_rn);
 				 printf("proc %d post to send right \n",rank);
 			 }
 
@@ -408,12 +416,12 @@ int main( int argc, char **argv )
 
 			 //wait for receive of those numbers
 			 if(halo_right){
-				 MPI_Wait(&rec_req_r, &r_st_r);
+				 MPI_Wait(&rec_req_rn, &r_st_rn);
 				 printf( "after move proc %d   receive count from right %d\n",rank,rec_r_count);
 			 }
 			 if(halo_left){
 				 if(rank == 1) printf("proc %d wait left wrong? \n",rank);
-				 MPI_Wait(&rec_req_l,&r_st_l);
+				 MPI_Wait(&rec_req_ln,&r_st_ln);
 					printf( "after move proc %d   receive count from left %d\n",rank,rec_l_count);
 			 }
 
@@ -475,7 +483,7 @@ int main( int argc, char **argv )
 			 }
 
 
-      MPI_Barrier(MPI_COMM_WORLD);
+
 			printf( "proc %d one step complete\n",rank);
     }
     simulation_time = read_timer( ) - simulation_time;
