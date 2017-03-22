@@ -202,19 +202,17 @@ int main( int argc, char **argv )
         for(int i = 0; i < bin_num; i++){
           bins[i].clear();
         }
-				printf( "cleared the bins\n");
         for(int i = 0; i < nlocal;i++){
           int partic_loc = bin_loc(local[i], proc_bin_width,bin_size,off_set_x-halo_left*bin_size,off_set_y);
           bins[partic_loc].push_back(local+i);
         }
-				printf( "push particle into bins\n");
         send_l_count = 0;
         send_r_count = 0;
 
         for(int i = 0; i < p_bin_num_y; i++){
           if(halo_left){
 						int bin_left_most = halo_left+i*(proc_bin_width);
-						if(rank == 0) printf( "proc %d left bin location %d\n",rank,bin_left_most);
+						//if(rank == 0) printf( "proc %d left bin location %d\n",rank,bin_left_most);
             for(int j = 0; j < bins[bin_left_most].size();j++){
                 send_l[send_l_count] = *bins[bin_left_most][j];
                 send_l_count++;
@@ -223,7 +221,7 @@ int main( int argc, char **argv )
 					//printf( "send_l_cout %d\n",send_l_cout);
           if(halo_right){//if halo right exists
 						int bin_right_most = p_bin_num_x - 1+halo_left+i*(proc_bin_width);
-						if(rank == 0) printf( "proc %d right bin location %d\n",rank,bin_right_most);
+						//if(rank == 0) printf( "proc %d right bin location %d\n",rank,bin_right_most);
             for(int j = 0; j <bins[bin_right_most].size(); j++){
               send_r[send_r_count] = *bins[bin_right_most][j];
               send_r_count++;
@@ -242,7 +240,7 @@ int main( int argc, char **argv )
         if(halo_right){
           MPI_Irecv(&rec_r_count,1,MPI_INT,rank+1,rank,MPI_COMM_WORLD,&rec_req_r);
         }
-				MPI_Barrier(MPI_COMM_WORLD);
+
         //send the number of particles to neighbour
          if(halo_left){
            MPI_Isend(&send_l_count,1,MPI_INT,rank-1,rank-1,MPI_COMM_WORLD,&req_l);
@@ -271,7 +269,7 @@ int main( int argc, char **argv )
         if(halo_right && rec_r_count){
           MPI_Irecv(receive_r,rec_r_count,PARTICLE,rank+1,rank,MPI_COMM_WORLD,&rec_req_r);
         }
-				MPI_Barrier(MPI_COMM_WORLD);
+
         //send halo area to other processors
         if(halo_left && send_l_count){
           MPI_Isend(send_l,send_l_count,PARTICLE,rank-1,rank-1,MPI_COMM_WORLD,&req_l);
@@ -287,7 +285,7 @@ int main( int argc, char **argv )
         if(halo_right&&rec_r_count){
           MPI_Wait(&rec_req_r,&r_st_r);
         }
-				MPI_Barrier(MPI_COMM_WORLD);
+
 				 printf( "proc %d spoped  receive halo area\n",rank);
 
         //push the received particles in halo area into the bins
@@ -404,7 +402,7 @@ int main( int argc, char **argv )
 				MPI_Irecv(&rec_r_count,1,MPI_INT,rank+1,rank,MPI_COMM_WORLD,&rec_req_rn);
 			}
 			//if(rank == 1) printf("proc %d post for receive right \n",rank);
-			MPI_Barrier(MPI_COMM_WORLD);
+
 			//send the number of particles to neighbour
 			 if(halo_left){
 				 MPI_Isend(&send_l_count,1,MPI_INT,rank-1,rank-1,MPI_COMM_WORLD,&req_ln);
@@ -439,7 +437,6 @@ int main( int argc, char **argv )
       }
 			//printf( "proc %d post for  receive array\n",rank);
       //send halo area to other processors
-			MPI_Barrier(MPI_COMM_WORLD);
       if(halo_left && send_l_count){
         MPI_Isend(send_l,send_l_count,PARTICLE,rank-1,rank-1,MPI_COMM_WORLD,&req_l);
       }
